@@ -1,3 +1,53 @@
+//! In cw-sdk, there are two types of accounts: base accounts, which are each
+//! controlled by a single secp256k1 private key, and contract accounts, each
+//! controlled by its underlying wasm binary code.
+//!
+//! Each account is associated with an address, which is a 256-bit byte array,
+//! encoded in bech32, derived deterministically from the account data:
+//!
+//! - a base account's address is derived from its public key
+//! - a contract account's address is derived from its label
+//!
+//! ## Contract labels
+//!
+//! Some special considerations must be taken for contract labels, as described
+//! below.
+//!
+//! The state machine must be programmed to ensure these labels:
+//!
+//! - are unique: no two contract has the same label, or have labels that derive
+//!   the same address (i.e. hash clash);
+//! - do not start with the prefix `cw1`: so that they can not be confused with
+//!   addresses.
+//!
+//! ## Raw addresses
+//!
+//! To improve developer experience, we would like that developers don't need to
+//! record the address of the contracts they want to interact with; instead,
+//! they can simply use the contract labels.
+//!
+//! Here we define the concept of "raw address", which is a string that is
+//! either:
+//!
+//! - a contract address, or
+//! - a contract label
+//!
+//! We know it's an address if it starts with `cw1`, or a label otherwise.
+//!
+//! For the convenience of users and developers, the state machine accepts raw
+//! addresses instead of addresses in many instances, for example:
+//!
+//! - when executing a contract (a user using the CLI, or a contract emitting
+//!   a submessage in the response) the contract address may be provided as a
+//!   raw address string;
+//! - similarly, when querying a contract (a user using the CLI, or a contract
+//!   using deps.querier);
+//! - when instantiating a new contract, the admin may be a raw address string
+//!   in SdkMsg::Instantiate.
+//!
+//! In these case, the state machine is responsible for resolving the raw
+//! address, returning the real underlying address as a cosmwasm_std::Addr.
+
 use bech32::{FromBase32, ToBase32, Variant};
 use cosmwasm_std::{Addr, CanonicalAddr};
 use thiserror::Error;
@@ -6,13 +56,14 @@ use crate::hash::sha256;
 
 /// Currently we simply hardcode the prefix in the state machine's binary.
 ///
-/// Ideally, we prefer this to be a configurable value in the chain's state. However, this would
-/// require a fork of cosmwasm-vm, which for now only support stateless address conversions:
+/// Ideally, we prefer this to be a configurable value in the chain's state.
+/// However, this would require a fork of cosmwasm-vm, which for now only
+/// support stateless address conversions:
 /// https://github.com/CosmWasm/cosmwasm/blob/v1.1.4/packages/vm/src/backend.rs#L128-L129
 pub const ADDRESS_PREFIX: &str = "cw";
 
-/// The latest version of ADR-028 has increased the address length from 20 bytes to 32, due to
-/// concerns of collisions.
+/// The latest version of ADR-028 has increased the address length from 20 bytes
+/// to 32, due to concerns of collisions.
 ///
 /// References:
 /// - ADR-028:
@@ -21,10 +72,12 @@ pub const ADDRESS_PREFIX: &str = "cw";
 ///   https://ethereum-magicians.org/t/increasing-address-size-from-20-to-32-bytes/5485/43
 pub const ADDRESS_LENGTH: usize = 32;
 
-/// According to ADR-028, each basic address (one that is represented by a single key pair), needs
-/// to have a "type" string denoting the public key scheme used.
+/// According to ADR-028, each basic address (one that is represented by a
+/// single key pair), needs to have a "type" string denoting the public key
+/// scheme used.
 ///
-/// For now, cw-sdk only supports the secp256k1 scheme. The type string is defined by:
+/// For now, cw-sdk only supports the secp256k1 scheme. The type string is
+/// defined by:
 /// https://github.com/cosmos/cosmos-sdk/blob/main/proto/cosmos/crypto/secp256k1/keys.proto
 pub const PUBKEY_TYPE: &str = "cosmos.crypto.secp256k1.PubKey";
 
@@ -55,7 +108,9 @@ pub fn humanize(canonical: &CanonicalAddr) -> Result<Addr, AddressError> {
 }
 
 /// Takes a human readable address and validates if it is valid.
-/// If it the validation succeeds, a `Addr` containing the same data as the input is returned.
+///
+/// If it the validation succeeds, a `Addr` containing the same data as the
+/// input is returned.
 pub fn validate(input: &str) -> Result<Addr, AddressError> {
     let canonical = canonicalize(input)?;
     let human = humanize(&canonical)?;
@@ -97,12 +152,26 @@ pub fn derive_from_label(label: &str) -> Result<Addr, AddressError> {
 }
 
 /// Just a helper function for the `derive_from_*` methods.
-/// Performs the last steps of the address derivation process according to ADR-028: take the hash,
-/// truncate to the standard length, and humanize.
+/// Performs the last steps of the address derivation process according to
+/// ADR-028: take the hash, truncate to the standard length, and humanize.
 fn humanize_prehash(preimage_bytes: &[u8]) -> Result<Addr, AddressError> {
     let mut bytes = sha256(preimage_bytes);
     bytes.truncate(ADDRESS_LENGTH);
     humanize(&bytes.into())
+}
+
+/// Resolve and validate a raw address, which may either be a contract's actual
+/// address or its label.
+///
+/// If the raw address string starts with the prefix `cw1`, we assume it is the
+/// actual address; otherwise we assume it is a label and derive the address
+/// from it.
+pub fn resolve_raw(addr_raw: &str) -> Result<Addr, AddressError> {
+    if addr_raw.starts_with(&format!("{ADDRESS_PREFIX}1")) {
+        validate(addr_raw)
+    } else {
+        derive_from_label(addr_raw)
+    }
 }
 
 #[derive(Debug, Error)]

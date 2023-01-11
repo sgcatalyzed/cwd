@@ -1,15 +1,16 @@
-use cosmwasm_std::{Addr, Binary, ContractResult, Env, Event, MessageInfo, Response, Storage, BlockInfo, TransactionInfo, ContractInfo};
-use cosmwasm_vm::{call_instantiate, Backend, Instance, InstanceOptions, call_execute};
-
+use cosmwasm_std::{
+    Addr, Binary, BlockInfo, ContractInfo, ContractResult, Env, Event, MessageInfo, Response,
+    Storage, TransactionInfo,
+};
+use cosmwasm_vm::{call_execute, call_instantiate, Backend, Instance, InstanceOptions};
 use cw_sdk::{address, hash::sha256, Account};
 use cw_store::Cached;
-
 use tracing::{debug, info};
 
 use crate::{
     backend::{BackendApi, BackendQuerier, ContractSubstore},
     error::{Error, Result},
-    state::{ACCOUNTS, CODES, CODE_COUNT, code_by_address},
+    state::{code_by_address, ACCOUNTS, CODES, CODE_COUNT},
 };
 
 pub fn store_code(

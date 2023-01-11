@@ -1,13 +1,11 @@
 use cosmwasm_std::{Binary, ContractInfo, Env, Order, Storage};
 use cosmwasm_vm::{call_query, Backend, Instance, InstanceOptions, Storage as VmStorage};
 use cw_paginate::{collect, paginate_indexed_map, paginate_map};
-use cw_storage_plus::Bound;
-
 use cw_sdk::{
-    label::resolve_raw_address,
-    Account, AccountResponse, CodeResponse, ContractResponse, InfoResponse, WasmRawResponse,
-    WasmSmartResponse,
+    address, Account, AccountResponse, CodeResponse, ContractResponse, InfoResponse,
+    WasmRawResponse, WasmSmartResponse,
 };
+use cw_storage_plus::Bound;
 
 use crate::{
     backend::{BackendApi, BackendQuerier, ContractSubstore},
@@ -23,7 +21,7 @@ pub fn info(store: &dyn Storage) -> Result<InfoResponse> {
 }
 
 pub fn account(store: &dyn Storage, address: String) -> Result<AccountResponse> {
-    let addr = resolve_raw_address(&address)?;
+    let addr = address::resolve_raw(&address)?;
     let account = ACCOUNTS.load(store, &addr)?;
     Ok(AccountResponse {
         address,
@@ -106,7 +104,7 @@ pub fn codes(
 }
 
 pub fn wasm_raw(store: impl Storage, contract: &str, key: &[u8]) -> Result<WasmRawResponse> {
-    let contract_addr = resolve_raw_address(contract)?;
+    let contract_addr = address::resolve_raw(contract)?;
     let substore = ContractSubstore::new(store, &contract_addr);
     let (value, _) = substore.get(key);
     Ok(WasmRawResponse {
@@ -119,7 +117,7 @@ pub fn wasm_smart(
     contract: &str,
     msg: &[u8],
 ) -> Result<WasmSmartResponse> {
-    let contract_addr = resolve_raw_address(contract)?;
+    let contract_addr = address::resolve_raw(contract)?;
 
     // load contract binary code
     let code = code_by_address(&store, &contract_addr)?;
