@@ -82,7 +82,7 @@ pub fn execute(
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractError> {
     match msg {
         QueryMsg::Ownership {} => to_binary(&cw_ownable::get_ownership(deps.storage)?),
-        QueryMsg::Config {} => to_binary(&query::config(deps)?),
+        QueryMsg::TokenCreationFee {} => to_binary(&query::token_creation_fee(deps)?),
         QueryMsg::Token {
             denom,
         } => to_binary(&query::token(deps, denom)?),

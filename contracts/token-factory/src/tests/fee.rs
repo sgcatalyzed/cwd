@@ -26,8 +26,8 @@ fn updating_fee() {
 
         execute::update_fee(deps.as_mut(), mock_info(OWNER, &[]), fee.clone()).unwrap();
 
-        let cfg = query::config(deps.as_ref()).unwrap();
-        assert_eq!(cfg.token_creation_fee, fee);
+        let token_creation_fee = query::token_creation_fee(deps.as_ref()).unwrap();
+        assert_eq!(token_creation_fee, fee);
     }
 }
 

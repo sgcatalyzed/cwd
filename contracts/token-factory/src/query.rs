@@ -1,17 +1,17 @@
-use cosmwasm_std::{Addr, Deps, StdResult};
+use cosmwasm_std::{Addr, Coin, Deps, StdResult};
 use cw_paginate::paginate_map;
 use cw_storage_plus::Bound;
 
 use crate::{
     error::ContractError,
     helpers::parse_denom,
-    msg::{Config, TokenResponse},
-    state::{CONFIG, TOKEN_CONFIGS},
+    msg::TokenResponse,
+    state::{TOKEN_CONFIGS, TOKEN_CREATION_FEE},
     NAMESPACE,
 };
 
-pub fn config(deps: Deps) -> StdResult<Config> {
-    CONFIG.load(deps.storage)
+pub fn token_creation_fee(deps: Deps) -> StdResult<Option<Coin>> {
+    TOKEN_CREATION_FEE.load(deps.storage)
 }
 
 pub fn token(deps: Deps, denom: String) -> Result<TokenResponse, ContractError> {

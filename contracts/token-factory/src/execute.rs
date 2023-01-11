@@ -1,6 +1,5 @@
 use cosmwasm_std::{
-    to_binary, Addr, BlockInfo, Coin, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Uint128,
-    WasmMsg,
+    to_binary, Addr, BlockInfo, Coin, Deps, DepsMut, Env, MessageInfo, Response, Uint128, WasmMsg,
 };
 use cw_bank::{denom::Denom, msg as bank};
 use cw_ownable::{assert_owner, Action as OwnershipAction};
@@ -13,8 +12,8 @@ use cw_utils::must_pay;
 use crate::{
     error::ContractError,
     helpers::parse_denom,
-    msg::{Config, TokenConfig},
-    state::{CONFIG, TOKEN_CONFIGS},
+    msg::TokenConfig,
+    state::{TOKEN_CONFIGS, TOKEN_CREATION_FEE},
     BANK,
     NAMESPACE,
 };
@@ -26,12 +25,7 @@ pub fn init(
 ) -> Result<Response, ContractError> {
     cw_ownable::initialize_owner(deps.storage, deps.api, Some(owner))?;
 
-    CONFIG.save(
-        deps.storage,
-        &Config {
-            token_creation_fee,
-        },
-    )?;
+    TOKEN_CREATION_FEE.save(deps.storage, &token_creation_fee)?;
 
     Ok(Response::default())
 }
@@ -56,14 +50,11 @@ pub fn update_fee(
 ) -> Result<Response, ContractError> {
     cw_ownable::assert_owner(deps.as_ref().storage, &info.sender)?;
 
-    let cfg = CONFIG.update(deps.storage, |mut cfg| -> StdResult<_> {
-        cfg.token_creation_fee = token_creation_fee;
-        Ok(cfg)
-    })?;
+    TOKEN_CREATION_FEE.save(deps.storage, &token_creation_fee)?;
 
     Ok(Response::new()
         .add_attribute("action", "token-factory/update_fee")
-        .add_attribute("new_fee", stringify_option(cfg.token_creation_fee)))
+        .add_attribute("new_fee", stringify_option(token_creation_fee)))
 }
 
 pub fn withdraw_fee(
@@ -110,12 +101,12 @@ pub fn create_token(
     admin: String,
     after_transfer_hook: Option<String>,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
+    let fee = TOKEN_CREATION_FEE.load(deps.storage)?;
 
-    if let Some(expected) = cfg.token_creation_fee {
-        let received_amount = must_pay(&info, &expected.denom)?;
-        if received_amount != expected.amount {
-            return Err(ContractError::incorrect_fee(expected, received_amount));
+    if let Some(fee) = fee {
+        let received_amount = must_pay(&info, &fee.denom)?;
+        if received_amount != fee.amount {
+            return Err(ContractError::incorrect_fee(fee, received_amount));
         }
     }
 

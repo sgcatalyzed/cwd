@@ -3,12 +3,6 @@ use cosmwasm_std::{Addr, Coin, Uint128};
 use cw_ownable::{cw_ownable_execute, cw_ownable_query};
 
 #[cw_serde]
-pub struct Config {
-    /// An optional fee for creating new denoms. Set to `None` to make it free.
-    pub token_creation_fee: Option<Coin>,
-}
-
-#[cw_serde]
 pub struct TokenConfig {
     /// Admin is the account who can mint and burn tokens.
     /// Set this to `None` will permanently disable any burning or minting of
@@ -112,9 +106,9 @@ pub enum ExecuteMsg {
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
-    /// Query the contract's configurations
-    #[returns(Config)]
-    Config {},
+    /// Query the token creation fee
+    #[returns(Option<Coin>)]
+    TokenCreationFee {},
 
     /// Query the configuration of a single token by denom
     #[returns(TokenResponse)]
