@@ -4,7 +4,8 @@ use cw_bank::msg as bank;
 use crate::{
     error::ContractError,
     execute,
-    tests::{setup_test, BANK, DENOM},
+    tests::{setup_test, DENOM},
+    BANK,
 };
 
 const BAD_GUY: &str = "badguy";

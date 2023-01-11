@@ -13,7 +13,6 @@ use cosmwasm_std::{
 use crate::execute;
 
 const OWNER: &str = "larry";
-const BANK: &str = "bank";
 const DENOM: &str = "factory/larry/uastro";
 
 fn fee() -> Coin {

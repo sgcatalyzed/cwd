@@ -7,7 +7,8 @@ use crate::{
     execute,
     msg::TokenConfig,
     state::TOKEN_CONFIGS,
-    tests::{setup_test, BANK},
+    tests::setup_test,
+    BANK,
 };
 
 const DENOM: &str = "factory/osmo1234abcd/uastro";

@@ -13,8 +13,10 @@ use cw_utils::must_pay;
 use crate::{
     error::ContractError,
     helpers::parse_denom,
-    msg::{Config, TokenConfig, NAMESPACE},
+    msg::{Config, TokenConfig},
     state::{CONFIG, TOKEN_CONFIGS},
+    BANK,
+    NAMESPACE,
 };
 
 pub fn init(
@@ -73,7 +75,7 @@ pub fn withdraw_fee(
     assert_owner(deps.as_ref().storage, &info.sender)?;
 
     let coins: Vec<Coin> = deps.querier.query_wasm_smart(
-        "bank",
+        BANK,
         &bank::QueryMsg::Balances {
             address: env.contract.address.to_string(),
             start_after: None,
@@ -92,7 +94,7 @@ pub fn withdraw_fee(
         .add_attribute("to", &to)
         .add_attribute("coins", stringify_coins(&coins))
         .add_message(WasmMsg::Execute {
-            contract_addr: "bank".into(),
+            contract_addr: BANK.into(),
             msg: to_binary(&bank::ExecuteMsg::Send {
                 to,
                 coins,
@@ -185,7 +187,7 @@ pub fn mint(
         .add_attribute("to", &to)
         .add_attribute("coin", format!("{amount}{denom}"))
         .add_message(WasmMsg::Execute {
-            contract_addr: "bank".into(),
+            contract_addr: BANK.into(),
             msg: to_binary(&bank::ExecuteMsg::Mint {
                 to,
                 denom,
@@ -209,7 +211,7 @@ pub fn burn(
         .add_attribute("from", &from)
         .add_attribute("coin", format!("{amount}{denom}"))
         .add_message(WasmMsg::Execute {
-            contract_addr: "bank".into(),
+            contract_addr: BANK.into(),
             msg: to_binary(&bank::ExecuteMsg::Burn {
                 from,
                 denom,
@@ -234,7 +236,7 @@ pub fn force_transfer(
         .add_attribute("from", &from)
         .add_attribute("coin", format!("{amount}{denom}"))
         .add_message(WasmMsg::Execute {
-            contract_addr: "bank".into(),
+            contract_addr: BANK.into(),
             msg: to_binary(&bank::ExecuteMsg::ForceTransfer {
                 from,
                 to,
@@ -253,9 +255,7 @@ pub fn after_transfer(
     denom: String,
     amount: Uint128,
 ) -> Result<Response, ContractError> {
-    if info.sender != address::derive_from_label("bank")? {
-        return Err(ContractError::NotBank);
-    }
+    assert_sender_bank(&info.sender)?;
 
     let (creator_addr, nonce) = parse_denom(deps.api, &denom)?;
     let token_cfg = TOKEN_CONFIGS.load(deps.storage, (&creator_addr, &nonce))?;
@@ -280,6 +280,17 @@ pub fn after_transfer(
             })?,
             funds: vec![],
         }))
+}
+
+/// Assert that the sender is the bank contract.
+fn assert_sender_bank(sender: &Addr) -> Result<(), ContractError> {
+    let bank = address::derive_from_label(BANK)?;
+
+    if *sender != bank {
+        return Err(ContractError::NotBank);
+    }
+
+    Ok(())
 }
 
 fn assert_denom_admin(
