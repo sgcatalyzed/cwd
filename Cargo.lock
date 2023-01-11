@@ -707,7 +707,7 @@ dependencies = [
 [[package]]
 name = "cw-address-like"
 version = "1.0.3"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=09c6024#09c60241c58c22be494661f8776f7cb26e774de5"
 dependencies = [
  "cosmwasm-std",
 ]
@@ -748,7 +748,7 @@ dependencies = [
 [[package]]
 name = "cw-optional-indexes"
 version = "0.1.0"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=09c6024#09c60241c58c22be494661f8776f7cb26e774de5"
 dependencies = [
  "cosmwasm-std",
  "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",
@@ -758,7 +758,7 @@ dependencies = [
 [[package]]
 name = "cw-ownable"
 version = "0.4.0"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=09c6024#09c60241c58c22be494661f8776f7cb26e774de5"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -772,7 +772,7 @@ dependencies = [
 [[package]]
 name = "cw-ownable-derive"
 version = "0.4.0"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=09c6024#09c60241c58c22be494661f8776f7cb26e774de5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -782,7 +782,7 @@ dependencies = [
 [[package]]
 name = "cw-paginate"
 version = "0.1.0"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=09c6024#09c60241c58c22be494661f8776f7cb26e774de5"
 dependencies = [
  "cosmwasm-std",
  "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",
