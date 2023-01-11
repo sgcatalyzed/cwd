@@ -706,8 +706,8 @@ dependencies = [
 
 [[package]]
 name = "cw-address-like"
-version = "1.0.2"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=be0ba1a#be0ba1a69086533fc5ae070a7dcabd70433c305b"
+version = "1.0.3"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
 dependencies = [
  "cosmwasm-std",
 ]
@@ -718,7 +718,7 @@ version = "0.0.0"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
- "cw-address-like",
+ "cw-ownable",
  "cw-paginate",
  "cw-sdk",
  "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",
@@ -748,7 +748,7 @@ dependencies = [
 [[package]]
 name = "cw-optional-indexes"
 version = "0.1.0"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=be0ba1a#be0ba1a69086533fc5ae070a7dcabd70433c305b"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
 dependencies = [
  "cosmwasm-std",
  "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",
@@ -756,9 +756,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "cw-ownable"
+version = "0.4.0"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-address-like",
+ "cw-ownable-derive",
+ "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",
+ "cw-utils",
+ "thiserror",
+]
+
+[[package]]
+name = "cw-ownable-derive"
+version = "0.4.0"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "cw-paginate"
 version = "0.1.0"
-source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=be0ba1a#be0ba1a69086533fc5ae070a7dcabd70433c305b"
+source = "git+https://github.com/steak-enjoyers/cw-plus-plus?rev=00ccdf5#00ccdf5881e20dbfbbf3d50f259a54b3401952c4"
 dependencies = [
  "cosmwasm-std",
  "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",

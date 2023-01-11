@@ -1,12 +1,7 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Coin, Uint128};
-use cw_address_like::AddressLike;
+use cw_ownable::{cw_ownable_execute, cw_ownable_query};
 pub use cw_sdk::bank::SudoMsg;
-
-#[cw_serde]
-pub struct Config<T: AddressLike> {
-    pub owner: T,
-}
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -40,6 +35,7 @@ pub struct UpdateNamespaceMsg {
     pub after_transfer_hook: Option<String>,
 }
 
+#[cw_ownable_execute]
 #[cw_serde]
 pub enum ExecuteMsg {
     /// Update the configuration of a namespace.
@@ -91,13 +87,10 @@ pub enum HookMsg {
     },
 }
 
+#[cw_ownable_query]
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
-    /// Contract configuration
-    #[returns(Config<String>)]
-    Config {},
-
     /// Query the config of a single namespace
     #[returns(NamespaceResponse)]
     Namespace {

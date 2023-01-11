@@ -1,21 +1,15 @@
 use std::str::FromStr;
 
-use cosmwasm_std::{Coin, Deps, StdResult, Uint128};
+use cosmwasm_std::{Coin, Deps, Uint128};
 use cw_paginate::{paginate_map, paginate_map_prefix};
 use cw_storage_plus::Bound;
 
 use crate::{
     denom::{Denom, Namespace},
     error::ContractError,
-    msg::{Config, NamespaceResponse},
-    state::{BALANCES, CONFIG, NAMESPACE_CONFIGS, SUPPLIES},
+    msg::NamespaceResponse,
+    state::{BALANCES, NAMESPACE_CONFIGS, SUPPLIES},
 };
-
-pub fn config(deps: Deps) -> StdResult<Config<String>> {
-    CONFIG.load(deps.storage).map(|cfg| Config {
-        owner: cfg.owner.into(),
-    })
-}
 
 pub fn namespace(deps: Deps, namespace: String) -> Result<NamespaceResponse, ContractError> {
     let ns = Namespace::from_str(&namespace)?;

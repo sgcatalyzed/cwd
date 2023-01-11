@@ -37,11 +37,17 @@ pub fn sudo(deps: DepsMut, _env: Env, msg: SudoMsg) -> Result<Response, Contract
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
+        ExecuteMsg::UpdateOwnership(action) => execute::update_ownership(
+            deps,
+            &env.block,
+            &info.sender,
+            action,
+        ),
         ExecuteMsg::UpdateNamespace(UpdateNamespaceMsg {
             namespace,
             admin,
@@ -73,7 +79,7 @@ pub fn execute(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractError> {
     match msg {
-        QueryMsg::Config {} => to_binary(&query::config(deps)?),
+        QueryMsg::Ownership {} => to_binary(&cw_ownable::get_ownership(deps.storage)?),
         QueryMsg::Namespace {
             namespace,
         } => to_binary(&query::namespace(deps, namespace)?),

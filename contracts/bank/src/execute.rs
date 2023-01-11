@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use cosmwasm_std::{
-    to_binary, Addr, Coin, DepsMut, MessageInfo, Response, Storage, Uint128, WasmMsg,
+    to_binary, Addr, BlockInfo, Coin, DepsMut, MessageInfo, Response, Storage, Uint128, WasmMsg,
 };
 
 use cw_sdk::helpers::{stringify_coins, stringify_option, validate_optional_addr};
@@ -9,9 +9,9 @@ use cw_sdk::helpers::{stringify_coins, stringify_option, validate_optional_addr}
 use crate::{
     denom::{Denom, Namespace, NamespaceConfig},
     error::ContractError,
-    msg::{Balance, Config, HookMsg, UpdateNamespaceMsg},
+    msg::{Balance, HookMsg, UpdateNamespaceMsg},
     state::{
-        decrease_balance, decrease_supply, increase_balance, increase_supply, BALANCES, CONFIG,
+        decrease_balance, decrease_supply, increase_balance, increase_supply, BALANCES,
         NAMESPACE_CONFIGS,
     },
 };
@@ -23,12 +23,7 @@ pub fn init(
     namespace_cfgs: Vec<UpdateNamespaceMsg>,
 ) -> Result<Response, ContractError> {
     // 1. Initialize config
-    CONFIG.save(
-        deps.storage,
-        &Config {
-            owner: deps.api.addr_validate(&owner)?,
-        },
-    )?;
+    cw_ownable::initialize_owner(deps.storage, deps.api, Some(&owner))?;
 
     // 2. Initialize balances
     // NOTE: Must ensure that for each address, there is no duplication in coin
@@ -85,6 +80,19 @@ pub fn init(
     Ok(Response::default())
 }
 
+pub fn update_ownership(
+    deps: DepsMut,
+    block: &BlockInfo,
+    sender: &Addr,
+    action: cw_ownable::Action,
+) -> Result<Response, ContractError> {
+    let ownership = cw_ownable::update_ownership(deps, block, sender, action)?;
+
+    Ok(Response::new()
+        .add_attribute("action", "bank/update_ownership")
+        .add_attributes(ownership.into_attributes()))
+}
+
 pub fn update_namespace(
     deps: DepsMut,
     info: MessageInfo,
@@ -92,11 +100,10 @@ pub fn update_namespace(
     admin: Option<String>,
     after_transfer_hook: Option<String>,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
     let ns = Namespace::from_str(&namespace)?;
 
     // The sender must be either the contract owner or the namespace's admin
-    if info.sender != cfg.owner {
+    if cw_ownable::assert_owner(deps.storage, &info.sender).is_err() {
         assert_namespace_admin(deps.as_ref().storage, &ns, &info.sender)?;
     }
 
@@ -258,10 +265,10 @@ fn transfer(
 
 fn assert_non_zero_amount(denom: &str, amount: Uint128) -> Result<(), ContractError> {
     if amount.is_zero() {
-        Err(ContractError::zero_amount(denom))
-    } else {
-        Ok(())
+        return Err(ContractError::zero_amount(denom));
     }
+
+    Ok(())
 }
 
 fn assert_namespace_admin(

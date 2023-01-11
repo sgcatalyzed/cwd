@@ -1,10 +1,11 @@
-use cosmwasm_std::{coin, testing::mock_dependencies};
+use cosmwasm_std::{coin, testing::mock_dependencies, Addr};
+use cw_ownable::Ownership;
 
 use crate::{
     denom::DenomError,
     error::ContractError,
     execute,
-    msg::{Balance, Config, NamespaceResponse, UpdateNamespaceMsg},
+    msg::{Balance, NamespaceResponse, UpdateNamespaceMsg},
     query,
     tests::{setup_test, OWNER},
 };
@@ -13,11 +14,13 @@ use crate::{
 fn proper_instantiation() {
     let deps = setup_test();
 
-    let cfg = query::config(deps.as_ref()).unwrap();
+    let ownership = cw_ownable::get_ownership(deps.as_ref().storage).unwrap();
     assert_eq!(
-        cfg,
-        Config {
-            owner: OWNER.into(),
+        ownership,
+        Ownership {
+            owner: Some(Addr::unchecked(OWNER)),
+            pending_owner: None,
+            pending_expiry: None,
         },
     );
 

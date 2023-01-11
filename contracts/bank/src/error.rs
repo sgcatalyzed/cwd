@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use cosmwasm_std::StdError;
+use cw_ownable::OwnershipError;
 use thiserror::Error;
 
 use crate::denom::DenomError;
@@ -8,10 +9,13 @@ use crate::denom::DenomError;
 #[derive(Error, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum ContractError {
-    #[error(transparent)]
+    #[error("{0}")]
     Std(#[from] StdError),
 
-    #[error(transparent)]
+    #[error("{0}")]
+    Ownership(#[from] OwnershipError),
+
+    #[error("{0}")]
     Denom(#[from] DenomError),
 
     #[error("sender is not the contract owner")]
