@@ -9,12 +9,8 @@ use crate::{
     state::{CONFIG, TOKEN_CONFIGS},
 };
 
-pub fn config(deps: Deps) -> StdResult<Config<String>> {
-    CONFIG.load(deps.storage).map(|cfg| Config {
-        owner: cfg.owner.into(),
-        bank: cfg.bank.into(),
-        token_creation_fee: cfg.token_creation_fee,
-    })
+pub fn config(deps: Deps) -> StdResult<Config> {
+    CONFIG.load(deps.storage)
 }
 
 pub fn token(deps: Deps, denom: String) -> Result<TokenResponse, ContractError> {

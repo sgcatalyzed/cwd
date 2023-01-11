@@ -878,9 +878,9 @@ version = "0.0.0"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
- "cw-address-like",
  "cw-bank",
  "cw-multi-test",
+ "cw-ownable",
  "cw-paginate",
  "cw-sdk",
  "cw-storage-plus 1.0.1 (git+https://github.com/CosmWasm/cw-storage-plus?rev=a45379e)",

@@ -124,7 +124,7 @@ pub fn resolve_raw(addr_raw: &str) -> Result<Addr, AddressError> {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum AddressError {
     #[error(transparent)]
     Bech32(#[from] bech32::Error),

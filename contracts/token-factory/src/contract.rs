@@ -20,7 +20,7 @@ pub fn instantiate(
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
     cw2::set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-    execute::init(deps, msg)
+    execute::init(deps, &msg.owner, msg.token_creation_fee)
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -31,6 +31,12 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
+        ExecuteMsg::UpdateOwnership(action) => execute::update_ownership(
+            deps,
+            &env.block,
+            &info.sender,
+            action,
+        ),
         ExecuteMsg::UpdateFee {
             token_creation_fee,
         } => execute::update_fee(deps, info, token_creation_fee),
@@ -75,6 +81,7 @@ pub fn execute(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractError> {
     match msg {
+        QueryMsg::Ownership {} => to_binary(&cw_ownable::get_ownership(deps.storage)?),
         QueryMsg::Config {} => to_binary(&query::config(deps)?),
         QueryMsg::Token {
             denom,

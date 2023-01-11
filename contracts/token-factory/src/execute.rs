@@ -1,9 +1,13 @@
 use cosmwasm_std::{
-    to_binary, Addr, Coin, Deps, DepsMut, Env, MessageInfo, Response, Uint128, WasmMsg,
+    to_binary, Addr, BlockInfo, Coin, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Uint128,
+    WasmMsg,
 };
-
 use cw_bank::{denom::Denom, msg as bank};
-use cw_sdk::helpers::{stringify_coins, stringify_option, validate_optional_addr};
+use cw_ownable::{assert_owner, Action as OwnershipAction};
+use cw_sdk::{
+    address,
+    helpers::{stringify_coins, stringify_option, validate_optional_addr},
+};
 use cw_utils::must_pay;
 
 use crate::{
@@ -13,17 +17,34 @@ use crate::{
     state::{CONFIG, TOKEN_CONFIGS},
 };
 
-pub fn init(deps: DepsMut, cfg: Config<String>) -> Result<Response, ContractError> {
+pub fn init(
+    deps: DepsMut,
+    owner: &str,
+    token_creation_fee: Option<Coin>,
+) -> Result<Response, ContractError> {
+    cw_ownable::initialize_owner(deps.storage, deps.api, Some(owner))?;
+
     CONFIG.save(
         deps.storage,
         &Config {
-            owner: deps.api.addr_validate(&cfg.owner)?,
-            bank: deps.api.addr_validate(&cfg.bank)?,
-            token_creation_fee: cfg.token_creation_fee,
+            token_creation_fee,
         },
     )?;
 
     Ok(Response::default())
+}
+
+pub fn update_ownership(
+    deps: DepsMut,
+    block: &BlockInfo,
+    sender: &Addr,
+    action: OwnershipAction,
+) -> Result<Response, ContractError> {
+    let ownership = cw_ownable::update_ownership(deps, block, sender, action)?;
+
+    Ok(Response::new()
+        .add_attribute("action", "token-factory/update_ownership")
+        .add_attributes(ownership.into_attributes()))
 }
 
 pub fn update_fee(
@@ -31,11 +52,9 @@ pub fn update_fee(
     info: MessageInfo,
     token_creation_fee: Option<Coin>,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.update(deps.storage, |mut cfg| {
-        if info.sender != cfg.owner {
-            return Err(ContractError::NotOwner);
-        }
+    cw_ownable::assert_owner(deps.as_ref().storage, &info.sender)?;
 
+    let cfg = CONFIG.update(deps.storage, |mut cfg| -> StdResult<_> {
         cfg.token_creation_fee = token_creation_fee;
         Ok(cfg)
     })?;
@@ -51,14 +70,10 @@ pub fn withdraw_fee(
     info: MessageInfo,
     to: Option<String>,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
-
-    if info.sender != cfg.owner {
-        return Err(ContractError::NotOwner);
-    }
+    assert_owner(deps.as_ref().storage, &info.sender)?;
 
     let coins: Vec<Coin> = deps.querier.query_wasm_smart(
-        &cfg.bank,
+        "bank",
         &bank::QueryMsg::Balances {
             address: env.contract.address.to_string(),
             start_after: None,
@@ -77,7 +92,7 @@ pub fn withdraw_fee(
         .add_attribute("to", &to)
         .add_attribute("coins", stringify_coins(&coins))
         .add_message(WasmMsg::Execute {
-            contract_addr: cfg.bank.into(),
+            contract_addr: "bank".into(),
             msg: to_binary(&bank::ExecuteMsg::Send {
                 to,
                 coins,
@@ -129,8 +144,6 @@ pub fn update_token(
     admin: Option<String>,
     after_transfer_hook: Option<String>,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
-
     // Either the contract owner or the token's admin can update the config.
     //
     // Here, if the sender is owner, we simply parse the denom into creator
@@ -138,7 +151,7 @@ pub fn update_token(
     //
     // If sender is not owner, we parse the denom AND check whether sender is
     // the token admin.
-    let (creator, nonce) = if info.sender == cfg.owner {
+    let (creator, nonce) = if assert_owner(deps.as_ref().storage, &info.sender).is_ok() {
         parse_denom(deps.api, &denom)?
     } else {
         assert_denom_admin(deps.as_ref(), &denom, &info.sender)?
@@ -165,8 +178,6 @@ pub fn mint(
     denom: String,
     amount: Uint128,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
-
     assert_denom_admin(deps.as_ref(), &denom, &info.sender)?;
 
     Ok(Response::new()
@@ -174,7 +185,7 @@ pub fn mint(
         .add_attribute("to", &to)
         .add_attribute("coin", format!("{amount}{denom}"))
         .add_message(WasmMsg::Execute {
-            contract_addr: cfg.bank.into(),
+            contract_addr: "bank".into(),
             msg: to_binary(&bank::ExecuteMsg::Mint {
                 to,
                 denom,
@@ -191,8 +202,6 @@ pub fn burn(
     denom: String,
     amount: Uint128,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
-
     assert_denom_admin(deps.as_ref(), &denom, &info.sender)?;
 
     Ok(Response::new()
@@ -200,7 +209,7 @@ pub fn burn(
         .add_attribute("from", &from)
         .add_attribute("coin", format!("{amount}{denom}"))
         .add_message(WasmMsg::Execute {
-            contract_addr: cfg.bank.into(),
+            contract_addr: "bank".into(),
             msg: to_binary(&bank::ExecuteMsg::Burn {
                 from,
                 denom,
@@ -218,8 +227,6 @@ pub fn force_transfer(
     denom: String,
     amount: Uint128,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
-
     assert_denom_admin(deps.as_ref(), &denom, &info.sender)?;
 
     Ok(Response::new()
@@ -227,7 +234,7 @@ pub fn force_transfer(
         .add_attribute("from", &from)
         .add_attribute("coin", format!("{amount}{denom}"))
         .add_message(WasmMsg::Execute {
-            contract_addr: cfg.bank.into(),
+            contract_addr: "bank".into(),
             msg: to_binary(&bank::ExecuteMsg::ForceTransfer {
                 from,
                 to,
@@ -246,9 +253,7 @@ pub fn after_transfer(
     denom: String,
     amount: Uint128,
 ) -> Result<Response, ContractError> {
-    let cfg = CONFIG.load(deps.storage)?;
-
-    if info.sender != cfg.bank {
+    if info.sender != address::derive_from_label("bank")? {
         return Err(ContractError::NotBank);
     }
 

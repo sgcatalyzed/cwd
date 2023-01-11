@@ -10,7 +10,7 @@ use cosmwasm_std::{
     Empty, OwnedDeps, Coin,
 };
 
-use crate::{execute, msg::Config};
+use crate::execute;
 
 const OWNER: &str = "larry";
 const BANK: &str = "bank";
@@ -23,15 +23,7 @@ fn fee() -> Coin {
 fn setup_test() -> OwnedDeps<MockStorage, MockApi, MockQuerier, Empty> {
     let mut deps = mock_dependencies();
 
-    execute::init(
-        deps.as_mut(),
-        Config {
-            owner: OWNER.into(),
-            bank: BANK.into(),
-            token_creation_fee: Some(fee()),
-        },
-    )
-    .unwrap();
+    execute::init(deps.as_mut(), OWNER.into(), Some(fee())).unwrap();
 
     execute::create_token(
         deps.as_mut(),

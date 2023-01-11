@@ -1,6 +1,7 @@
 use cosmwasm_std::{coin, coins, Addr, Coin, Empty, Event, Uint128};
 use cw_bank::msg::{self as bank, UpdateNamespaceMsg};
 use cw_multi_test::{App, ContractWrapper, Executor};
+use cw_ownable::OwnershipError;
 
 use crate::{
     error::ContractError,
@@ -123,7 +124,6 @@ impl TestSuite {
                 deployer.clone(),
                 &InstantiateMsg {
                     owner: OWNER.into(),
-                    bank: bank.to_string(),
                     token_creation_fee: None,
                 },
                 &[],
@@ -258,7 +258,7 @@ fn not_owner() {
         )
         .unwrap_err();
 
-    assert_eq!(err.downcast::<ContractError>().unwrap(), ContractError::NotOwner);
+    assert_eq!(err.downcast::<ContractError>().unwrap(), OwnershipError::NotOwner.into());
 }
 
 #[test]

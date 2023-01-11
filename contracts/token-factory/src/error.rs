@@ -8,20 +8,23 @@ use crate::msg::NAMESPACE;
 #[derive(Debug, Error)]
 #[cfg_attr(any(test, feature = "library"), derive(PartialEq))]
 pub enum ContractError {
-    #[error(transparent)]
+    #[error("{0}")]
     Std(#[from] StdError),
 
-    #[error(transparent)]
+    #[error("{0}")]
+    Address(#[from] cw_sdk::address::AddressError),
+
+    #[error("{0}")]
+    Ownership(#[from] cw_ownable::OwnershipError),
+
+    #[error("{0}")]
     Payment(#[from] PaymentError),
 
-    #[error(transparent)]
+    #[error("{0}")]
     Denom(#[from] DenomError),
 
     #[error("the contract has no coins to transfer")]
     NoBalance,
-
-    #[error("sender is not the contract owner")]
-    NotOwner,
 
     #[error("sender is not the bank contract")]
     NotBank,

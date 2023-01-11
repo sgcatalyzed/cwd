@@ -1,9 +1,10 @@
-use cosmwasm_std::coin;
+use cosmwasm_std::{coin, Addr};
+use cw_ownable::Ownership;
 
 use crate::{
     msg::Config,
     query,
-    tests::{setup_test, BANK, OWNER},
+    tests::{setup_test, OWNER},
 };
 
 #[test]
@@ -14,9 +15,17 @@ fn proper_instantiation() {
     assert_eq!(
         cfg,
         Config {
-            owner: OWNER.into(),
-            bank: BANK.into(),
             token_creation_fee: Some(coin(12345, "ujuno"))
+        },
+    );
+
+    let ownership = cw_ownable::get_ownership(deps.as_ref().storage).unwrap();
+    assert_eq!(
+        ownership,
+        Ownership {
+            owner: Some(Addr::unchecked(OWNER)),
+            pending_owner: None,
+            pending_expiry: None,
         },
     );
 }

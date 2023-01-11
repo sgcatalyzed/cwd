@@ -2,10 +2,11 @@ use cosmwasm_std::{
     coin,
     testing::{mock_env, mock_info},
 };
+use cw_ownable::OwnershipError;
 
 use crate::{
-    error::ContractError,
-    execute, query,
+    execute,
+    query,
     tests::{setup_test, OWNER},
 };
 
@@ -16,7 +17,7 @@ fn updating_fee() {
     // non-owner cannot update fee
     {
         let err = execute::update_fee(deps.as_mut(), mock_info("jake", &[]), None).unwrap_err();
-        assert_eq!(err, ContractError::NotOwner);
+        assert_eq!(err, OwnershipError::NotOwner.into());
     }
 
     // owner properly updates fee
@@ -44,7 +45,7 @@ fn withdrawing_fee() {
         )
         .unwrap_err();
 
-        assert_eq!(err, ContractError::NotOwner);
+        assert_eq!(err, OwnershipError::NotOwner.into());
     }
 
     // further tests require querying the bank contract
