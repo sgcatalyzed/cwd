@@ -146,18 +146,7 @@ pub fn update_token(
     admin: Option<String>,
     after_transfer_hook: Option<String>,
 ) -> Result<Response, ContractError> {
-    // Either the contract owner or the token's admin can update the config.
-    //
-    // Here, if the sender is owner, we simply parse the denom into creator
-    // address + nonce, and skip checking whether sender is the token admin.
-    //
-    // If sender is not owner, we parse the denom AND check whether sender is
-    // the token admin.
-    let (creator, nonce) = if assert_owner(deps.as_ref().storage, &info.sender).is_ok() {
-        parse_denom(deps.api, &denom)?
-    } else {
-        assert_denom_admin(deps.as_ref(), &denom, &info.sender)?
-    };
+    let (creator, nonce) = assert_denom_admin(deps.as_ref(), &denom, &info.sender)?;
 
     TOKEN_CONFIGS.update(deps.storage, (&creator, &nonce), |opt| -> Result<_, ContractError> {
         let mut token_cfg = opt.ok_or_else(|| ContractError::token_not_found(&denom))?;
@@ -293,6 +282,8 @@ fn assert_sender_bank(sender: &Addr) -> Result<(), ContractError> {
     Ok(())
 }
 
+/// Assert that sender is the denom's current admin. Return the denom's creator
+/// and nonce.
 fn assert_denom_admin(
     deps: Deps,
     denom: &str,
