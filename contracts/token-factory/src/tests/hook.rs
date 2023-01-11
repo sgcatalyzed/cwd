@@ -1,6 +1,6 @@
 use cosmwasm_std::{testing::mock_info, to_binary, Addr, Storage, SubMsg, Uint128, WasmMsg};
-
 use cw_bank::msg as bank;
+use cw_sdk::address;
 
 use crate::{
     error::ContractError,
@@ -50,7 +50,7 @@ fn hook_undefined() {
 
     let res = execute::after_transfer(
         deps.as_mut(),
-        mock_info(BANK, &[]),
+        mock_info(address::derive_from_label(BANK).unwrap().as_str(), &[]),
         "alice".into(),
         "bob".into(),
         DENOM.into(),
@@ -69,7 +69,7 @@ fn hook_defined() {
 
     let res = execute::after_transfer(
         deps.as_mut(),
-        mock_info(BANK, &[]),
+        mock_info(address::derive_from_label(BANK).unwrap().as_str(), &[]),
         "alice".into(),
         "bob".into(),
         DENOM.into(),
