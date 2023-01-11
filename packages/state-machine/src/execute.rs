@@ -2,7 +2,7 @@ use cosmwasm_std::{
     Addr, Binary, BlockInfo, ContractInfo, ContractResult, Env, Event, MessageInfo, Response,
     Storage, TransactionInfo,
 };
-use cosmwasm_vm::{call_execute, call_instantiate, Backend, Instance, InstanceOptions};
+use cosmwasm_vm::{call_execute, call_instantiate, call_sudo, Backend, Instance, InstanceOptions};
 use cw_sdk::{address, hash::sha256, Account};
 use cw_store::Cached;
 use tracing::{debug, info};
@@ -129,6 +129,60 @@ pub fn instantiate_contract(
         },
         ContractResult::Err(err) => {
             debug!(target: "Failed to instantiate contract", code_id, label, reason = err);
+        }
+    }
+
+    Ok(result)
+}
+
+pub fn sudo_contract(
+    store: impl Storage + 'static,
+    env: &Env,
+    msg: &[u8],
+) -> Result<ContractResult<Response>> {
+    let cache = Cached::new(store);
+
+    // load wasm binary code
+    let code = code_by_address(&cache, &env.contract.address)?;
+
+    // create the wasm instance and call the execute entry point
+    let mut instance = Instance::from_code(
+        &code,
+        Backend {
+            api: BackendApi,
+            storage: ContractSubstore::new(cache, &env.contract.address),
+            querier: BackendQuerier,
+        },
+        InstanceOptions {
+            gas_limit: u64::MAX,
+            print_debug: true,
+        },
+        None,
+    )?;
+    let result = call_sudo(&mut instance, env, msg)?;
+
+    // contract execution is finished; we recycle the cached store
+    let mut cache = instance
+        .recycle()
+        .expect("[cw-state-machine]: failed to recycle instance")
+        .storage
+        .recycle();
+
+    // if the execution is successful, flush the state changes to the underlying store
+    match &result {
+        ContractResult::Ok(_) => {
+            cache.flush();
+            debug!(
+                target: "Sudoed contract",
+                address = env.contract.address.to_string(),
+            );
+        },
+        ContractResult::Err(err) => {
+            debug!(
+                target: "Failed to sudo contract",
+                address = env.contract.address.to_string(),
+                reason = err,
+            );
         }
     }
 
