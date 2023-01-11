@@ -1,6 +1,6 @@
 use cosmwasm_std::{Addr, Api};
 
-use crate::{error::ContractError, msg::NAMESPACE};
+use crate::{error::ContractError, NAMESPACE};
 
 pub(crate) fn parse_denom(api: &dyn Api, denom: &str) -> Result<(Addr, String), ContractError> {
     let Some((namespace, subdenom)) = denom.split_once('/') else {

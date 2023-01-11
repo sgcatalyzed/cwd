@@ -3,7 +3,7 @@ use cw_bank::denom::DenomError;
 use cw_utils::PaymentError;
 use thiserror::Error;
 
-use crate::msg::NAMESPACE;
+use crate::NAMESPACE;
 
 #[derive(Debug, Error)]
 #[cfg_attr(any(test, feature = "library"), derive(PartialEq))]

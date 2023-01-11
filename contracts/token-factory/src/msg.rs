@@ -2,13 +2,6 @@ use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Coin, Uint128};
 use cw_ownable::{cw_ownable_execute, cw_ownable_query};
 
-/// The bank contract's label
-pub const BANK: &str = "bank";
-
-/// The namespace that the token factory contract must be assigned as admin at
-/// the bank contract.
-pub const NAMESPACE: &str = "factory";
-
 #[cw_serde]
 pub struct Config {
     /// An optional fee for creating new denoms. Set to `None` to make it free.

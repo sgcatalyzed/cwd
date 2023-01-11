@@ -5,8 +5,9 @@ use cw_storage_plus::Bound;
 use crate::{
     error::ContractError,
     helpers::parse_denom,
-    msg::{Config, TokenResponse, NAMESPACE},
+    msg::{Config, TokenResponse},
     state::{CONFIG, TOKEN_CONFIGS},
+    NAMESPACE,
 };
 
 pub fn config(deps: Deps) -> StdResult<Config> {
