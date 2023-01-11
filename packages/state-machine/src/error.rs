@@ -86,6 +86,11 @@ pub enum Error {
         found: u64,
     },
 
+    #[error("failed to transfer funds: {reason}")]
+    FundTransferFailed {
+        reason: String,
+    },
+
     #[error("contract response includes submessages, which is not supported yet")]
     SubmessagesUnsupported,
 
@@ -157,6 +162,12 @@ impl Error {
             sender: sender.into(),
             expect,
             found,
+        }
+    }
+
+    pub fn fund_transfer_failed(reason: impl ToString) -> Self {
+        Self::FundTransferFailed {
+            reason: reason.to_string(),
         }
     }
 }

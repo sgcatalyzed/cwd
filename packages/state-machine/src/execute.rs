@@ -1,9 +1,9 @@
 use cosmwasm_std::{
-    Addr, Binary, BlockInfo, ContractInfo, ContractResult, Env, Event, MessageInfo, Response,
-    Storage, TransactionInfo,
+    to_binary, Addr, Binary, BlockInfo, ContractInfo, ContractResult, Env, Event, MessageInfo,
+    Response, Storage, TransactionInfo,
 };
 use cosmwasm_vm::{call_execute, call_instantiate, call_sudo, Backend, Instance, InstanceOptions};
-use cw_sdk::{address, hash::sha256, Account};
+use cw_sdk::{address, bank, hash::sha256, Account};
 use cw_store::Cached;
 use tracing::{debug, info};
 
@@ -135,11 +135,14 @@ pub fn instantiate_contract(
     Ok(result)
 }
 
-pub fn sudo_contract(
-    store: impl Storage + 'static,
+pub fn sudo_contract<S>(
+    store: S,
     env: &Env,
     msg: &[u8],
-) -> Result<ContractResult<Response>> {
+) -> Result<(ContractResult<Response>, S)>
+where
+    S: Storage + 'static,
+{
     let cache = Cached::new(store);
 
     // load wasm binary code
@@ -186,7 +189,7 @@ pub fn sudo_contract(
         }
     }
 
-    Ok(result)
+    Ok((result, cache.recycle()))
 }
 
 pub fn execute_contract(
@@ -196,6 +199,14 @@ pub fn execute_contract(
     msg: &[u8],
 ) -> Result<ContractResult<Response>> {
     let cache = Cached::new(store);
+
+    // if the message has coins attached to it, we first invoke bank contract to
+    // transfer the coins
+    let (mut fund_events, cache) = if !info.funds.is_empty() {
+        transfer_funds(cache, env, info)?
+    } else {
+        (vec![], cache)
+    };
 
     // load wasm binary code
     let code = code_by_address(&cache, &env.contract.address)?;
@@ -214,7 +225,7 @@ pub fn execute_contract(
         },
         None,
     )?;
-    let result = call_execute(&mut instance, env, info, msg)?;
+    let mut result = call_execute(&mut instance, env, info, msg)?;
 
     // contract execution is finished; we recycle the cached store
     let mut cache = instance
@@ -223,10 +234,15 @@ pub fn execute_contract(
         .storage
         .recycle();
 
-    // if the execution is successful, flush the state changes to the underlying store
-    match &result {
-        ContractResult::Ok(_) => {
+    match &mut result {
+        ContractResult::Ok(resp) => {
+            // flush the state changes
             cache.flush();
+
+            // prepend fund transfer events
+            fund_events.extend(resp.events.iter().cloned());
+            resp.events = fund_events;
+
             debug!(
                 target: "Executed contract",
                 address = env.contract.address.to_string(),
@@ -253,4 +269,30 @@ pub fn migrate_contract(
     _msg: &[u8]
 ) -> Result<ContractResult<Response>> {
     todo!();
+}
+
+fn transfer_funds<S>(store: S, env: &Env, info: &MessageInfo) -> Result<(Vec<Event>, S)>
+where
+    S: Storage + 'static,
+{
+    let sudo_env = Env {
+        block: env.block.clone(),
+        transaction: None,
+        contract: ContractInfo {
+            address: address::derive_from_label("bank")?,
+        },
+    };
+
+    let sudo_msg = to_binary(&bank::SudoMsg::Transfer {
+        from: info.sender.to_string(),
+        to: env.contract.address.to_string(),
+        coins: info.funds.clone(),
+    })?;
+
+    let (result, store) = sudo_contract(store, &sudo_env, &sudo_msg)?;
+
+    match result {
+        ContractResult::Ok(resp) => Ok((resp.events, store)),
+        ContractResult::Err(err) => Err(Error::fund_transfer_failed(err)),
+    }
 }

@@ -199,9 +199,6 @@ impl StateMachine {
                     },
                 };
 
-                if !funds.is_empty() {
-                    return Err(Error::FundsUnsupported);
-                }
                 let info = MessageInfo {
                     sender: sender_addr.clone(),
                     funds,
