@@ -3,7 +3,7 @@ use std::str::FromStr;
 use cosmwasm_std::{
     to_binary, Addr, BlockInfo, Coin, DepsMut, MessageInfo, Response, Storage, Uint128, WasmMsg,
 };
-
+use cw_ownable::is_owner;
 use cw_sdk::helpers::{stringify_coins, stringify_option, validate_optional_addr};
 
 use crate::{
@@ -103,7 +103,7 @@ pub fn update_namespace(
     let ns = Namespace::from_str(&namespace)?;
 
     // The sender must be either the contract owner or the namespace's admin
-    if cw_ownable::assert_owner(deps.storage, &info.sender).is_err() {
+    if !is_owner(deps.storage, &info.sender)? {
         assert_namespace_admin(deps.as_ref().storage, &ns, &info.sender)?;
     }
 
