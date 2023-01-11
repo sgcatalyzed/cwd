@@ -1,6 +1,7 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Coin, Uint128};
 use cw_address_like::AddressLike;
+pub use cw_sdk::bank::SudoMsg;
 
 #[cw_serde]
 pub struct Config<T: AddressLike> {
@@ -37,19 +38,6 @@ pub struct UpdateNamespaceMsg {
     pub namespace: String,
     pub admin: Option<String>,
     pub after_transfer_hook: Option<String>,
-}
-
-// TODO: this should be in `cw-sdk` crate
-#[cw_serde]
-pub enum SudoMsg {
-    /// Forcibly transfer coins between two accounts.
-    /// Callable by the state machine when handling gas fee payments and funds
-    /// attached to messages.
-    Transfer {
-        from: String,
-        to: String,
-        coins: Vec<Coin>,
-    },
 }
 
 #[cw_serde]

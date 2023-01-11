@@ -1,6 +1,6 @@
 use cosmwasm_schema::cw_serde;
 
-use crate::SdkMsg;
+use crate::msg::SdkMsg;
 
 /// This should be included inside `~/.tendermint/genesis.json`, under the
 /// `app_state` field.

@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::Binary;
 
-use crate::SdkMsg;
+use crate::msg::SdkMsg;
 
 /// Tendermint will provide this as JSON bytes by in the CheckTx and DeliverTx
 /// requests. The state machine should deserialize the bytes upon receipt.

@@ -1,6 +1,6 @@
 # cw-sdk
 
-Common type definitions for [CosmWasm SDK](https://github.com/steak-enjoyers/cw-sdk)
+Type definitions and helper functions used throughout [CosmWasm SDK](https://github.com/steak-enjoyers/cw-sdk).
 
 ## License
 
