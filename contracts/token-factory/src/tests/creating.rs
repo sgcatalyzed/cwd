@@ -149,25 +149,16 @@ fn proper_token_update() {
         );
     }
 
-    // contract owner can update token
+    // contract owner can not update token
     {
-        execute::update_token(
+        let err = execute::update_token(
             deps.as_mut(),
             mock_info(OWNER, &[]),
             DENOM.into(),
             Some(OWNER.into()),
             Some("another_contract".into()),
         )
-        .unwrap();
-
-        let token = query::token(deps.as_ref(), DENOM.into()).unwrap();
-        assert_eq!(
-            token,
-            TokenResponse {
-                denom: DENOM.into(),
-                admin: Some(OWNER.into()),
-                after_transfer_hook: Some("another_contract".into()),
-            },
-        );
+        .unwrap_err();
+        assert_eq!(err, ContractError::not_token_admin(DENOM));
     }
 }
