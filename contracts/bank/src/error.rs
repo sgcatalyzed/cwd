@@ -18,9 +18,6 @@ pub enum ContractError {
     #[error("{0}")]
     Denom(#[from] DenomError),
 
-    #[error("sender is not the contract owner")]
-    NotOwner,
-
     #[error("sender is not the admin for namespace {namespace}")]
     NotNamespaceAdmin {
         namespace: String,
