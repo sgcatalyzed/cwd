@@ -4,8 +4,10 @@
 # 2. We only want to compile contracts to the wasm target, not cwd or others.
 #    Use the `--exclude` flag to exclude them.
 # 3. Since we exlude cw-store, we can use the stable toolchain.
-on: push
 name: CosmWasm
+
+on: push
+
 jobs:
   build:
     name: Build
@@ -13,6 +15,7 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -20,6 +23,7 @@ jobs:
           target: wasm32-unknown-unknown
           override: true
           profile: minimal
+
       - name: Build contracts
         uses: actions-rs/cargo@v1
         with:
