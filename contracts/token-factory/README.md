@@ -1,6 +1,6 @@
 # cw-token-factory
 
-Inspired by Osmosis' [x/tokenfactory](https://github.com/osmosis-labs/osmosis/tree/main/x/tokenfactory) module, the `token-factory` contract is an implementation of the [`bank`](../bank) contract's namespace admin. It allows anyone to permissionlessly create denoms, at a fee (set by governance).
+Inspired by Osmosis' [x/tokenfactory][1] module, the `token-factory` contract is an implementation of the [`bank`](../bank) contract's namespace admin. It allows anyone to permissionlessly create denoms, at a fee (set by governance).
 
 On chains with permissioned contract deployment, we expect it to be more typical for projects to reserve their own namespaces at the bank contract (at approval by governance). The `token-factory` contract is perhaps more suitable for permissionless chains.
 
@@ -18,4 +18,8 @@ Where `creator` is the token creator's address, and `nonce` is an arbitrary alph
 
 ## License
 
-Contents of this crate are open source under [GNU Affero General Public License](../../LICENSE) v3 or later.
+Contents of this crate at or prior to commit [`3dbd7ad`][2] are released under [GNU Affero General Public License][3] v3 or later; contents after the said commit are proprietary.
+
+[1]: https://github.com/osmosis-labs/osmosis/tree/main/x/tokenfactory
+[2]: https://github.com/steak-enjoyers/cw-sdk/commit/3dbd7ad89cfa5f5d0cf5c904b100f55a8952db3f
+[3]: https://github.com/steak-enjoyers/cw-sdk/blob/3dbd7ad89cfa5f5d0cf5c904b100f55a8952db3f/LICENSE
