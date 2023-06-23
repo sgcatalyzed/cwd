@@ -40,7 +40,7 @@ pub fn tokens(
         None => None,
     };
 
-    paginate_map(TOKEN_CONFIGS, deps.storage, start, limit, |(creator, nonce), cfg| {
+    paginate_map(&TOKEN_CONFIGS, deps.storage, start, limit, |(creator, nonce), cfg| {
         Ok(TokenResponse {
             denom: format!("{NAMESPACE}/{creator}/{nonce}"),
             admin: cfg.admin.map(String::from),
