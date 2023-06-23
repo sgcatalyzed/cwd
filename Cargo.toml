@@ -1,5 +1,6 @@
 [workspace]
-members = ["cwd", "contracts/*", "packages/*"]
+members  = ["cwd", "contracts/*", "packages/*"]
+resolver = "2"
 
 [workspace.package]
 version       = "0.0.0"
@@ -24,16 +25,16 @@ cosmwasm-schema      = "1.2"
 cosmwasm-std         = { version = "1.2", features = ["cosmwasm_1_1"] }
 cosmwasm-vm          = "1.2"
 cw2                  = "1.0"
-cw-address-like      = { git = "https://github.com/larry0x/cw-plus-plus", rev = "09c6024" }     # TODO: update after cw-storage-plus new release
+cw-address-like      = { git = "https://github.com/larry0x/cw-plus-plus", rev = "a500757" }
 cw-bank              = { path = "./contracts/bank" }
 cw-multi-test        = "0.16"
-cw-optional-indexes  = { git = "https://github.com/larry0x/cw-plus-plus", rev = "09c6024" }     # TODO: update after cw-storage-plus new release
-cw-ownable           = { git = "https://github.com/larry0x/cw-plus-plus", rev = "09c6024" }     # TODO: update after cw-storage-plus new release
-cw-paginate          = { git = "https://github.com/larry0x/cw-plus-plus", rev = "09c6024" }     # TODO: update after cw-storage-plus new release
+cw-optional-indexes  = { git = "https://github.com/larry0x/cw-plus-plus", rev = "a500757" }
+cw-ownable           = { git = "https://github.com/larry0x/cw-plus-plus", rev = "a500757" }
+cw-paginate          = { git = "https://github.com/larry0x/cw-plus-plus", rev = "a500757" }
 cw-sdk               = { path = "./packages/sdk" }
 cw-server            = { path = "./packages/server" }
 cw-state-machine     = { path = "./packages/state-machine" }
-cw-storage-plus      = { git = "https://github.com/CosmWasm/cw-storage-plus", rev = "a45379e" } # TODO: update after cw-storage-plus new release
+cw-storage-plus      = "1.1"
 cw-store             = { path = "./packages/store" }
 cw-token-factory     = { path = "./contracts/token-factory" }
 cw-utils             = "1.0"

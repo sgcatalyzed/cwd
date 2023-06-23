@@ -27,7 +27,7 @@ pub fn namespaces(
     limit: Option<u32>,
 ) -> Result<Vec<NamespaceResponse>, ContractError> {
     let start = start_after.map(|namespace| Bound::ExclusiveRaw(namespace.into_bytes()));
-    paginate_map(NAMESPACE_CONFIGS, deps.storage, start, limit, |namespace, cfg| {
+    paginate_map(&NAMESPACE_CONFIGS, deps.storage, start, limit, |namespace, cfg| {
         Ok(NamespaceResponse {
             namespace: namespace.into(),
             admin: cfg.admin.map(String::from),
@@ -51,7 +51,7 @@ pub fn supplies(
     limit: Option<u32>,
 ) -> Result<Vec<Coin>, ContractError> {
     let start = start_after.map(|denom| Bound::ExclusiveRaw(denom.into_bytes()));
-    paginate_map(SUPPLIES, deps.storage, start, limit, |denom, amount| {
+    paginate_map(&SUPPLIES, deps.storage, start, limit, |denom, amount| {
         Ok(Coin {
             denom: denom.into(),
             amount,
@@ -77,7 +77,7 @@ pub fn balances(
 ) -> Result<Vec<Coin>, ContractError> {
     let start = start_after.map(|denom| Bound::ExclusiveRaw(denom.into_bytes()));
     let prefix = deps.api.addr_validate(&address)?;
-    paginate_map_prefix(BALANCES, deps.storage, &prefix, start, limit, |denom, amount| {
+    paginate_map_prefix(&BALANCES, deps.storage, &prefix, start, limit, |denom, amount| {
         Ok(Coin {
             denom: denom.into(),
             amount,
