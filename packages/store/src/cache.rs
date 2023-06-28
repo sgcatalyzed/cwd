@@ -3,7 +3,10 @@ use std::{collections::BTreeMap, iter};
 use cosmwasm_std::{Order, Record, Storage};
 use merk::Op;
 
-use crate::iterators::{range_bounds, MergedIter};
+use crate::{
+    clone_op,
+    iterators::{range_bounds, MergedIter},
+};
 
 /// Holds an immutable reference of any storage object that implements the
 /// `Storage` trait, and a temporary, in-memory cache of uncommitted ops.
@@ -36,7 +39,12 @@ impl<T: Storage> Cached<T> {
 
     /// Apply the pending ops to the underlying store.
     pub fn flush(&mut self) {
-        for (key, op) in self.pending_ops.drain_filter(|_, _| true) {
+        // unlike hashmap, btreemap doesn't have a handy `drain` method
+        // so we have to do this, which is very inefficient:
+        let batch: Vec<_> = self.pending_ops.iter().map(clone_op).collect();
+        self.pending_ops = BTreeMap::new();
+
+        for (key, op) in batch {
             match op {
                 Op::Put(value) => self.store.set(&key, &value),
                 Op::Delete => self.store.remove(&key),

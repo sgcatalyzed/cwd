@@ -13,7 +13,7 @@ use merk::{Merk, Op};
 use crate::{
     helpers::must_get,
     iterators::{range_bounds, MemIter, MergedIter, MerkIter},
-    MerkError,
+    MerkError, clone_op,
 };
 
 pub struct StoreBase {
@@ -70,10 +70,10 @@ impl Store {
     pub fn commit(&self) -> Result<(), MerkError> {
         let mut ref_mut = self.borrow_mut();
 
-        // use `drain_filter` to clear the map and take ownership of all items.
-        // this way we avoid having to clone the items
-        // it'd be great if BTreeMap has a simple `drain_all` method
-        let batch: Vec<_> = ref_mut.pending_ops.drain_filter(|_, _| true).collect();
+        // unlike hashmap, btreemap doesn't have a handy `drain` method
+        // so we have to do this, which is very inefficient:
+        let batch: Vec<_> = ref_mut.pending_ops.iter().map(clone_op).collect();
+        ref_mut.pending_ops = BTreeMap::new();
 
         // we know the ops are sorted by keys (as they are collected from a
         // btreemap), so we skip the checking step
