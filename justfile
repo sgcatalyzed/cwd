@@ -1,3 +1,6 @@
+install:
+  cargo install --path ./cwd
+
 check:
   cargo check --target wasm32-unknown-unknown
 
