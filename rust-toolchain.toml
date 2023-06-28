@@ -1,0 +1,7 @@
+# https://stackoverflow.com/questions/75959388/how-to-switch-rust-analyzer-from-stable-to-nightly-in-vscode
+#
+# we have to use nightly for now because crates from Nomic (ed, merk) use
+# nightly. we're working on implementing our own state commitment library to
+# replace Nomic's so that we can switch back to stable.
+[toolchain]
+channel = "nightly"
