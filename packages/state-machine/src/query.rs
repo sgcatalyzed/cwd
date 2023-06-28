@@ -35,7 +35,7 @@ pub fn accounts(
     limit: Option<u32>,
 ) -> Result<Vec<AccountResponse>> {
     let start = start_after.map(|address| Bound::ExclusiveRaw(address.into_bytes()));
-    paginate_indexed_map(ACCOUNTS, store, start, limit, |address, account| {
+    paginate_indexed_map(&ACCOUNTS, store, start, limit, |address, account| {
         Ok(AccountResponse {
             address: address.into(),
             account: account.into(),
@@ -95,7 +95,7 @@ pub fn codes(
     limit: Option<u32>,
 ) -> Result<Vec<CodeResponse>> {
     let start = start_after.map(Bound::exclusive);
-    paginate_map(CODES, store, start, limit, |code_id, wasm_byte_code| {
+    paginate_map(&CODES, store, start, limit, |code_id, wasm_byte_code| {
         Ok(CodeResponse {
             code_id,
             wasm_byte_code,
