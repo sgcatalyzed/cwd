@@ -1,10 +1,8 @@
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
 use clap::Args;
+use cwd::{path, AppConfig, ClientConfig, DaemonError};
 use tracing::info;
-
-use crate::{path, AppConfig, ClientConfig, DaemonError};
 
 #[derive(Args)]
 pub struct InitCmd;

@@ -1,27 +1,23 @@
-mod client;
-mod commands;
-mod config;
-mod error;
-mod key;
-mod keyring;
-mod path;
-mod print;
-mod prompt;
+mod debug;
+mod genesis;
+mod init;
+mod keys;
+mod query;
+mod reset;
+mod start;
+mod tendermint;
+mod tx;
 
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
+use cwd::{path, AppConfig, DaemonError};
 use tracing::error;
 use tracing_subscriber::filter::LevelFilter;
 
 use crate::{
-    commands::{
-        DebugCmd, GenesisCmd, InitCmd, KeysCmd, QueryCmd, ResetCmd, StartCmd, TendermintCmd, TxCmd,
-    },
-    config::{AppConfig, ClientConfig},
-    error::DaemonError,
-    key::Key,
-    keyring::Keyring,
+    debug::DebugCmd, genesis::GenesisCmd, init::InitCmd, keys::KeysCmd, query::QueryCmd,
+    reset::ResetCmd, start::StartCmd, tendermint::TendermintCmd, tx::TxCmd,
 };
 
 #[derive(Parser)]

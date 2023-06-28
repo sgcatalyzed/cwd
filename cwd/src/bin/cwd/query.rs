@@ -11,14 +11,13 @@ use cw_sdk::{
     hash::sha256, AccountResponse, CodeResponse, ContractResponse, InfoResponse, SdkQuery,
     WasmRawResponse, WasmSmartResponse,
 };
-use serde::Serialize;
-use serde_json::Value;
-use tracing::{error, info};
-
-use crate::{
+use cwd::{
     client::{create_http_client, do_abci_query},
     path, print, ClientConfig, DaemonError,
 };
+use serde::Serialize;
+use serde_json::Value;
+use tracing::{error, info};
 
 #[derive(Args)]
 pub struct QueryCmd {

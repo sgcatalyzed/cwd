@@ -1,7 +1,7 @@
 use clap::{Args, Subcommand};
 use cw_sdk::address;
 
-use crate::DaemonError;
+use cwd::DaemonError;
 
 #[derive(Args)]
 pub struct DebugCmd {

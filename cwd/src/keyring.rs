@@ -1,8 +1,10 @@
 //! The logics of this file is largely cloned from Go SDK's file keyring:
 //! https://github.com/cosmos/keyring/blob/master/file.go
 
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use colored::Colorize;
 use josekit::{jwe, jwt};

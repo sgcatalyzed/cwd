@@ -1,14 +1,14 @@
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use clap::{Args, Subcommand};
+use cw_sdk::{address, hash::sha256, GenesisState, SdkMsg};
+use cwd::{path, print, DaemonError};
 use serde::Serialize;
 use tendermint::genesis::Genesis as TmGenesis;
 use tracing::info;
-
-use cw_sdk::{address, hash::sha256, GenesisState, SdkMsg};
-
-use crate::{path, print, DaemonError};
 
 #[derive(Args)]
 pub struct GenesisCmd {

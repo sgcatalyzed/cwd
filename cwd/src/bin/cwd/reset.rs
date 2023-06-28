@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use clap::Args;
 use tracing::info;
 
-use crate::{path::stringify, DaemonError};
+use crate::{path, DaemonError};
 
 #[derive(Args)]
 pub struct ResetCmd;
@@ -19,7 +19,7 @@ impl ResetCmd {
         fs::remove_dir_all(&data_dir)?;
         fs::create_dir(&data_dir)?;
 
-        info!("Deleted application database at {}", stringify(&data_dir)?);
+        info!("Deleted application database at {}", path::stringify(&data_dir)?);
 
         Ok(())
     }

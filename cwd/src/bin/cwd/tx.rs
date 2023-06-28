@@ -8,13 +8,12 @@ use clap::{Args, Subcommand};
 use colored::*;
 use cosmwasm_std::Addr;
 use cw_sdk::{Account, AccountResponse, SdkMsg, SdkQuery, TxBody};
-use tendermint_rpc::Client;
-use tracing::warn;
-
-use crate::{
+use cwd::{
     client::{create_http_client, do_abci_query},
     print, prompt, ClientConfig, DaemonError, Keyring,
 };
+use tendermint_rpc::Client;
+use tracing::warn;
 
 #[derive(Args)]
 pub struct TxCmd {

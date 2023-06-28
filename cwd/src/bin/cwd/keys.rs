@@ -2,9 +2,8 @@ use std::path::Path;
 
 use bip32::{Language, Mnemonic};
 use clap::{Args, Subcommand};
+use cwd::{print, prompt, DaemonError, Key, Keyring};
 use rand_core::OsRng;
-
-use crate::{print, prompt, DaemonError, Key, Keyring};
 
 #[derive(Args)]
 pub struct KeysCmd {
