@@ -2,8 +2,10 @@ use std::path::Path;
 
 use bip32::{Language, Mnemonic};
 use clap::{Args, Subcommand};
-use cwd::{print, prompt, DaemonError, Key, Keyring};
+use cwd::{print, prompt, Key, Keyring};
 use rand_core::OsRng;
+
+use crate::Result;
 
 #[derive(Args)]
 pub struct KeysCmd {
@@ -46,7 +48,7 @@ pub enum KeysSubcmd {
 }
 
 impl KeysCmd {
-    pub fn run(&self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub fn run(&self, home_dir: &Path) -> Result<()> {
         let keyring = Keyring::new(home_dir.join("keys"))?;
 
         match &self.subcommand {

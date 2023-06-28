@@ -1,11 +1,9 @@
 use std::path::Path;
 
-use thiserror::Error;
-
 use crate::path;
 
-#[derive(Debug, Error)]
-pub enum DaemonError {
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
     #[error(transparent)]
     Address(#[from] cw_sdk::address::AddressError),
 
@@ -91,14 +89,14 @@ pub enum DaemonError {
     },
 }
 
-impl DaemonError {
-    pub fn file_exists(filename: &Path) -> Result<Self, Self> {
+impl Error {
+    pub fn file_exists(filename: &Path) -> Result<Self> {
         Ok(Self::FileExists {
             filename: path::stringify(filename)?,
         })
     }
 
-    pub fn file_not_found(filename: &Path) -> Result<Self, Self> {
+    pub fn file_not_found(filename: &Path) -> Result<Self> {
         Ok(Self::FileNotFound {
             filename: path::stringify(filename)?,
         })
@@ -128,3 +126,5 @@ impl DaemonError {
         }
     }
 }
+
+pub type Result<T> = core::result::Result<T, Error>;

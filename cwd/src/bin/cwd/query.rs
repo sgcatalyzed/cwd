@@ -13,11 +13,13 @@ use cw_sdk::{
 };
 use cwd::{
     client::{create_http_client, do_abci_query},
-    path, print, ClientConfig, DaemonError,
+    path, print, ClientConfig,
 };
 use serde::Serialize;
 use serde_json::Value;
 use tracing::{error, info};
+
+use crate::Result;
 
 #[derive(Args)]
 pub struct QueryCmd {
@@ -107,7 +109,7 @@ pub enum QuerySubcmd {
 }
 
 impl QueryCmd {
-    pub async fn run(self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub async fn run(self, home_dir: &Path) -> Result<()> {
         let client_cfg = ClientConfig::load(home_dir)?;
         let client = create_http_client(self.node.as_ref(), &client_cfg)?;
 

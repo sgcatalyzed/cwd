@@ -10,10 +10,12 @@ use cosmwasm_std::Addr;
 use cw_sdk::{Account, AccountResponse, SdkMsg, SdkQuery, TxBody};
 use cwd::{
     client::{create_http_client, do_abci_query},
-    print, prompt, ClientConfig, DaemonError, Keyring,
+    print, prompt, ClientConfig, Error, Keyring,
 };
 use tendermint_rpc::Client;
 use tracing::warn;
+
+use crate::Result;
 
 #[derive(Args)]
 pub struct TxCmd {
@@ -89,7 +91,7 @@ pub enum TxSubcmd {
 }
 
 impl TxCmd {
-    pub async fn run(self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub async fn run(self, home_dir: &Path) -> Result<()> {
         // load sender key
         let keyring = Keyring::new(home_dir.join("keys"))?;
         let key = keyring.get(&self.from)?;
@@ -131,7 +133,7 @@ impl TxCmd {
                             ..
                         },
                         ..
-                    }) => return Err(DaemonError::sender_is_contract(&sender_addr)),
+                    }) => return Err(Error::sender_is_contract(&sender_addr)),
 
                     // if query results in an error, and the error is that the
                     // account is not found, we use zero.
@@ -140,7 +142,7 @@ impl TxCmd {
                     //
                     // TODO: instead of string matching, we should establish a
                     // standardized list of error codes and match the code instead
-                    Err(DaemonError::QueryFailed {
+                    Err(Error::QueryFailed {
                         err,
                     }) if err.contains(&format!("{} not found", type_name::<Account<Addr>>())) => {
                         warn!(
@@ -179,7 +181,7 @@ impl TxCmd {
                 admin,
             } => {
                 if funds.is_some() {
-                    return Err(DaemonError::unsupported_feature("sending funds"));
+                    return Err(Error::unsupported_feature("sending funds"));
                 }
                 SdkMsg::Instantiate {
                     code_id,
@@ -196,7 +198,7 @@ impl TxCmd {
                 funds,
             } => {
                 if funds.is_some() {
-                    return Err(DaemonError::unsupported_feature("sending funds"));
+                    return Err(Error::unsupported_feature("sending funds"));
                 }
                 SdkMsg::Execute {
                     contract,

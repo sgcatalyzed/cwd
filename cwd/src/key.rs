@@ -5,7 +5,7 @@ use k256::ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey};
 
 use cw_sdk::{address, Tx, TxBody};
 
-use crate::DaemonError;
+use crate::{Error, Result};
 
 /// Represents a private key that is to be saved in the keyring.
 ///
@@ -26,7 +26,7 @@ impl Key {
         name: impl Into<String>,
         mnemonic: &Mnemonic,
         coin_type: u32,
-    ) -> Result<Self, DaemonError> {
+    ) -> Result<Self> {
         // The `to_seed` function takes a password to generate salt. Here we just use an empty str.
         // For reference, both Terra Station and Keplr use an empty string as well:
         // - https://github.com/terra-money/terra.js/blob/v3.1.7/src/key/MnemonicKey.ts#L79
@@ -44,7 +44,7 @@ impl Key {
     pub fn from_privkey_bytes(
         name: impl Into<String>,
         sk_bytes: &[u8],
-    ) -> Result<Self, DaemonError> {
+    ) -> Result<Self> {
         let sk = SigningKey::from_bytes(sk_bytes)?;
         Ok(Self {
             name: name.into(),
@@ -64,8 +64,8 @@ impl Key {
 
     /// Return the key's address bytes, generated according to
     /// [ADR-028](https://docs.cosmos.network/v0.45/architecture/adr-028-public-key-addresses.html)
-    pub fn address(&self) -> Result<Addr, address::AddressError> {
-        address::derive_from_pubkey(self.pubkey().to_bytes().as_slice())
+    pub fn address(&self) -> Result<Addr> {
+        address::derive_from_pubkey(self.pubkey().to_bytes().as_slice()).map_err(Into::into)
     }
 
     /// Sign an arbitrary byte array. The bytes are SHA-256 hashed before signing
@@ -74,7 +74,7 @@ impl Key {
     }
 
     /// Sign a tx body, returns the full tx.
-    pub fn sign_tx(&self, body: &TxBody) -> Result<Tx, DaemonError> {
+    pub fn sign_tx(&self, body: &TxBody) -> Result<Tx> {
         let body_bytes = serde_json::to_vec(body)?;
         let signature = self.sign_bytes(&body_bytes);
         Ok(Tx {
@@ -86,9 +86,9 @@ impl Key {
 }
 
 impl TryFrom<Key> for JwtPayload {
-    type Error = josekit::JoseError;
+    type Error = Error;
 
-    fn try_from(key: Key) -> Result<Self, Self::Error> {
+    fn try_from(key: Key) -> Result<Self> {
         let sk_str = hex::encode(key.sk.to_bytes().as_slice());
         let mut payload = JwtPayload::new();
         payload.set_claim("name", Some(key.name.into()))?;
@@ -98,19 +98,19 @@ impl TryFrom<Key> for JwtPayload {
 }
 
 impl TryFrom<JwtPayload> for Key {
-    type Error = DaemonError;
+    type Error = Error;
 
-    fn try_from(payload: JwtPayload) -> Result<Self, Self::Error> {
+    fn try_from(payload: JwtPayload) -> Result<Self> {
         let name = payload
             .claim("name")
-            .ok_or_else(|| DaemonError::malformed_payload("key `name` not found"))?
+            .ok_or_else(|| Error::malformed_payload("key `name` not found"))?
             .as_str()
-            .ok_or_else(|| DaemonError::malformed_payload("incorrect JSON value type for `name`"))?;
+            .ok_or_else(|| Error::malformed_payload("incorrect JSON value type for `name`"))?;
         let sk_str = payload
             .claim("sk")
-            .ok_or_else(|| DaemonError::malformed_payload("key `sk` not found"))?
+            .ok_or_else(|| Error::malformed_payload("key `sk` not found"))?
             .as_str()
-            .ok_or_else(|| DaemonError::malformed_payload("incorrect JSON value type for `sk`"))?;
+            .ok_or_else(|| Error::malformed_payload("incorrect JSON value type for `sk`"))?;
 
         let sk_bytes = hex::decode(sk_str)?;
         Key::from_privkey_bytes(name, &sk_bytes)

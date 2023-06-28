@@ -4,12 +4,12 @@ use serde::{de::DeserializeOwned, Serialize};
 use tendermint_rpc::{Client, HttpClient, Url};
 use tracing::error;
 
-use crate::{ClientConfig, DaemonError};
+use crate::{ClientConfig, Error, Result};
 
 pub fn create_http_client(
     node: Option<&String>,
     client_cfg: &ClientConfig,
-) -> Result<HttpClient, DaemonError> {
+) -> Result<HttpClient> {
     let url_str = node.unwrap_or(&client_cfg.node);
     let url = Url::from_str(url_str)?;
     HttpClient::new(url).map_err(Into::into)
@@ -18,7 +18,7 @@ pub fn create_http_client(
 pub async fn do_abci_query<Q: Serialize, R: DeserializeOwned>(
     client: &HttpClient,
     query: Q,
-) -> Result<R, DaemonError> {
+) -> Result<R> {
     // serialize the query into binary
     let query_bytes = serde_json::to_vec(&query)?;
 
@@ -27,7 +27,7 @@ pub async fn do_abci_query<Q: Serialize, R: DeserializeOwned>(
     let result = client.abci_query(Some("app".into()), query_bytes, None, false).await?;
 
     if result.code.is_err() {
-        return Err(DaemonError::query_failed(result.log));
+        return Err(Error::query_failed(result.log));
     }
 
     // deserialize the response

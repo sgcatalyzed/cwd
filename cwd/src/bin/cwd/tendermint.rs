@@ -1,9 +1,11 @@
 use std::{path::Path, str::FromStr};
 
 use clap::{Args, Subcommand};
-use cwd::{client::create_http_client, print, ClientConfig, DaemonError};
+use cwd::{client::create_http_client, print, ClientConfig};
 use tendermint::Hash;
 use tendermint_rpc::Client;
+
+use crate::Result;
 
 #[derive(Args)]
 pub struct TendermintCmd {
@@ -49,7 +51,7 @@ pub enum TendermintSubcmd {
 }
 
 impl TendermintCmd {
-    pub async fn run(self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub async fn run(self, home_dir: &Path) -> Result<()> {
         let client_cfg = ClientConfig::load(home_dir)?;
         let client = create_http_client(self.node.as_ref(), &client_cfg)?;
 

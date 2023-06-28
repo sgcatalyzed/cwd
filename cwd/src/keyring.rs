@@ -9,7 +9,7 @@ use std::{
 use colored::Colorize;
 use josekit::{jwe, jwt};
 
-use crate::{path, prompt, DaemonError, Key};
+use crate::{path, prompt, Error, Key, Result};
 
 /// Keyring is a wrapper around a PathBuf, which represents the directory where the encrypted key
 /// files are to be saved.
@@ -17,7 +17,7 @@ pub struct Keyring(PathBuf);
 
 impl Keyring {
     /// Create a new keyring under the given directory
-    pub fn new(dir: PathBuf) -> Result<Self, DaemonError> {
+    pub fn new(dir: PathBuf) -> Result<Self> {
         if !dir.exists() {
             fs::create_dir_all(&dir)?;
         }
@@ -39,7 +39,7 @@ impl Keyring {
     /// Firstly, check whether a password hash file already exists:
     /// - If yes, prompt the user to enter the password, and check against the hash file;
     /// - If not, prompt the user to enter a new password, and save the hash to the file;
-    pub fn unlock(&self) -> Result<String, DaemonError> {
+    pub fn unlock(&self) -> Result<String> {
         let password_hash_path = self.dir().join("password_hash");
         if password_hash_path.exists() {
             let password = prompt::password(format!(
@@ -54,7 +54,7 @@ impl Keyring {
             if bcrypt::verify(&password, &password_hash)? {
                 Ok(password)
             } else {
-                Err(DaemonError::IncorrectPassword)
+                Err(Error::IncorrectPassword)
             }
         } else {
             // TODO: ask the user to repeat the password?
@@ -74,10 +74,10 @@ impl Keyring {
     }
 
     /// Save a key in the keyring
-    pub fn set(&self, key: &Key) -> Result<(), DaemonError> {
+    pub fn set(&self, key: &Key) -> Result<()> {
         let filename = self.filename(&key.name);
         if filename.exists() {
-            return Err(DaemonError::file_exists(&filename)?);
+            return Err(Error::file_exists(&filename)?);
         }
 
         // header
@@ -102,12 +102,12 @@ impl Keyring {
     }
 
     /// Read binary data stored in the keyring with the given name
-    pub fn get(&self, name: &str) -> Result<Key, DaemonError> {
+    pub fn get(&self, name: &str) -> Result<Key> {
         // load the file
         let token = {
             let filename = self.filename(name);
             if !filename.exists() {
-                return Err(DaemonError::file_not_found(&filename)?);
+                return Err(Error::file_not_found(&filename)?);
             }
             fs::read(&filename)?
         };
@@ -118,11 +118,11 @@ impl Keyring {
         let (payload, _) = jwt::decode_with_decrypter(token, &decrypter)?;
 
         // recover key from payload
-        payload.try_into().map_err(DaemonError::from)
+        payload.try_into().map_err(Into::into)
     }
 
     /// Read binary data of all keys stored in the keyring
-    pub fn list(&self) -> Result<Vec<Key>, DaemonError> {
+    pub fn list(&self) -> Result<Vec<Key>> {
         let password = self.unlock()?;
         let decrypter = jwe::PBES2_HS256_A128KW.decrypter_from_bytes(password.as_bytes())?;
 
@@ -132,19 +132,19 @@ impl Keyring {
                 let entry = entry?;
                 let token = fs::read(entry.path())?;
                 let (payload, _) = jwt::decode_with_decrypter(token, &decrypter)?;
-                payload.try_into().map_err(DaemonError::from)
+                payload.try_into().map_err(Into::into)
             })
             .filter(|res| res.is_ok())
             .collect()
     }
 
     /// Delete a key
-    pub fn delete(&self, name: &str) -> Result<(), DaemonError> {
+    pub fn delete(&self, name: &str) -> Result<()> {
         let filename = self.filename(name);
         if filename.exists() {
-            fs::remove_file(filename).map_err(DaemonError::from)
+            fs::remove_file(filename).map_err(Into::into)
         } else {
-            Err(DaemonError::file_not_found(&filename)?)
+            Err(Error::file_not_found(&filename)?)
         }
     }
 }

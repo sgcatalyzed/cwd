@@ -3,7 +3,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::DaemonError;
+use crate::Result;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppConfig {
@@ -21,10 +21,10 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
-    pub fn load(home_dir: &Path) -> Result<Self, DaemonError> {
+    pub fn load(home_dir: &Path) -> Result<Self> {
         let cfg_path = home_dir.join("config/app.toml");
         let cfg_bytes = fs::read(cfg_path)?;
-        toml::from_slice(&cfg_bytes).map_err(DaemonError::from)
+        toml::from_slice(&cfg_bytes).map_err(Into::into)
     }
 }
 
@@ -46,9 +46,9 @@ impl Default for ClientConfig {
 }
 
 impl ClientConfig {
-    pub fn load(home_dir: &Path) -> Result<Self, DaemonError> {
+    pub fn load(home_dir: &Path) -> Result<Self> {
         let cfg_path = home_dir.join("config/client.toml");
         let cfg_bytes = fs::read(cfg_path)?;
-        toml::from_slice(&cfg_bytes).map_err(DaemonError::from)
+        toml::from_slice(&cfg_bytes).map_err(Into::into)
     }
 }

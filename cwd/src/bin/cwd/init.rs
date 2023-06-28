@@ -1,16 +1,18 @@
 use std::{fs, path::Path};
 
 use clap::Args;
-use cwd::{path, AppConfig, ClientConfig, DaemonError};
+use cwd::{path, AppConfig, ClientConfig, Error};
 use tracing::info;
+
+use crate::Result;
 
 #[derive(Args)]
 pub struct InitCmd;
 
 impl InitCmd {
-    pub fn run(&self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub fn run(&self, home_dir: &Path) -> Result<()> {
         if home_dir.exists() {
-            return Err(DaemonError::file_exists(home_dir)?);
+            return Err(Error::file_exists(home_dir)?);
         }
 
         fs::create_dir_all(home_dir.join("config"))?;

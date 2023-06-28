@@ -8,14 +8,15 @@ use tracing::info;
 use cw_server::{App, AppDriver};
 use cw_state_machine::StateMachine;
 use cw_store::Store;
+use cwd::AppConfig;
 
-use crate::{AppConfig, DaemonError};
+use crate::Result;
 
 #[derive(Args)]
 pub struct StartCmd;
 
 impl StartCmd {
-    pub fn run(&self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub fn run(&self, home_dir: &Path) -> Result<()> {
         // load config from disk
         let app_cfg = AppConfig::load(home_dir)?;
         info!("Loaded application config");

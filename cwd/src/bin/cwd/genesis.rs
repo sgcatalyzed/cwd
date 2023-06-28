@@ -5,10 +5,12 @@ use std::{
 
 use clap::{Args, Subcommand};
 use cw_sdk::{address, hash::sha256, GenesisState, SdkMsg};
-use cwd::{path, print, DaemonError};
+use cwd::{path, print, Error};
 use serde::Serialize;
 use tendermint::genesis::Genesis as TmGenesis;
 use tracing::info;
+
+use crate::Result;
 
 #[derive(Args)]
 pub struct GenesisCmd {
@@ -75,7 +77,7 @@ pub enum GenesisSubcommand {
 }
 
 impl GenesisCmd {
-    pub fn run(self) -> Result<(), DaemonError> {
+    pub fn run(self) -> Result<()> {
         let tm_home = match &self.tendermint_home {
             None => path::default_tm_home()?,
             Some(tm_home) => tm_home.clone(),
@@ -84,7 +86,7 @@ impl GenesisCmd {
         let genesis_path = tm_home.join("config/genesis.json");
 
         if !genesis_path.exists() {
-            return Err(DaemonError::file_not_found(&genesis_path)?);
+            return Err(Error::file_not_found(&genesis_path)?);
         }
 
         let genesis_bytes = fs::read(&genesis_path)?;
@@ -124,7 +126,7 @@ impl GenesisCmd {
                 admin,
             } => {
                 if funds.is_some() {
-                    return Err(DaemonError::unsupported_feature("sending funds"));
+                    return Err(Error::unsupported_feature("sending funds"));
                 }
                 app_state.msgs.push(SdkMsg::Instantiate {
                     code_id,
@@ -142,7 +144,7 @@ impl GenesisCmd {
                 funds,
             } => {
                 if funds.is_some() {
-                    return Err(DaemonError::unsupported_feature("sending funds"));
+                    return Err(Error::unsupported_feature("sending funds"));
                 }
                 app_state.msgs.push(SdkMsg::Execute {
                     contract,
@@ -200,7 +202,7 @@ fn update_and_write(
     genesis: &mut TmGenesis,
     app_state: &GenesisState,
     genesis_path: &Path,
-) -> Result<(), DaemonError> {
+) -> Result<()> {
     genesis.app_state = serde_json::to_value(app_state)?;
     let genesis_str = serde_json::to_vec_pretty(&genesis)?;
     fs::write(genesis_path, genesis_str)?;

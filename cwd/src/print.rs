@@ -1,7 +1,7 @@
 use cosmwasm_std::Addr;
 use serde::Serialize;
 
-use crate::{DaemonError, Key};
+use crate::{Error, Key, Result};
 
 /// Print a BIP-38 mnemonic phrase
 pub fn mnemonic(phrase: &str) {
@@ -21,23 +21,23 @@ pub fn mnemonic(phrase: &str) {
 }
 
 /// Print a serializable object as pretty JSON
-pub fn json(data: impl serde::Serialize) -> Result<(), DaemonError> {
+pub fn json(data: impl serde::Serialize) -> Result<()> {
     let data_str = serde_json::to_string_pretty(&data)?;
     println!("{data_str}");
     Ok(())
 }
 
 /// Print a signing key
-pub fn key(key: &Key) -> Result<(), DaemonError> {
+pub fn key(key: &Key) -> Result<()> {
     json(PrintableKey::try_from(key)?)
 }
 
 /// Print multiple signing keys, sorted alphabetically by name
-pub fn keys(keys: &[Key]) -> Result<(), DaemonError> {
+pub fn keys(keys: &[Key]) -> Result<()> {
     json(keys
         .iter()
         .map(PrintableKey::try_from)
-        .collect::<Result<Vec<_>, _>>()?)
+        .collect::<Result<Vec<_>>>()?)
 }
 
 #[derive(Serialize)]
@@ -49,9 +49,9 @@ struct PrintableKey<'a> {
 }
 
 impl<'a> TryFrom<&'a Key> for PrintableKey<'a> {
-    type Error = DaemonError;
+    type Error = Error;
 
-    fn try_from(key: &'a Key) -> Result<Self, Self::Error> {
+    fn try_from(key: &'a Key) -> Result<Self> {
         Ok(Self {
             name: &key.name,
             address: key.address()?,

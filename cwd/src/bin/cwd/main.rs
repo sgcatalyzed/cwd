@@ -11,7 +11,7 @@ mod tx;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use cwd::{path, AppConfig, DaemonError};
+use cwd::path;
 use tracing::error;
 use tracing_subscriber::filter::LevelFilter;
 
@@ -66,7 +66,7 @@ pub enum Command {
     UnsafeResetAll(ResetCmd),
 }
 
-async fn run() -> Result<(), DaemonError> {
+async fn run() -> Result<()> {
     let cli = Cli::parse();
 
     // set home directory
@@ -102,3 +102,5 @@ async fn main() {
         error!("command failed with error: {}", err);
     }
 }
+
+type Result<T> = core::result::Result<T, cwd::Error>;

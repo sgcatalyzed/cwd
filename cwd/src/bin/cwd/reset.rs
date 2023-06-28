@@ -1,15 +1,16 @@
 use std::{fs, path::Path};
 
 use clap::Args;
+use cwd::path;
 use tracing::info;
 
-use crate::{path, DaemonError};
+use crate::Result;
 
 #[derive(Args)]
 pub struct ResetCmd;
 
 impl ResetCmd {
-    pub fn run(&self, home_dir: &Path) -> Result<(), DaemonError> {
+    pub fn run(&self, home_dir: &Path) -> Result<()> {
         let data_dir = home_dir.join("data");
 
         // Rust doesn't provide a function to delete all files under a folder

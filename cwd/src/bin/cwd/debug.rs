@@ -1,7 +1,7 @@
 use clap::{Args, Subcommand};
 use cw_sdk::address;
 
-use cwd::DaemonError;
+use crate::Result;
 
 #[derive(Args)]
 pub struct DebugCmd {
@@ -27,7 +27,7 @@ pub enum DebugSubcmd {
 }
 
 impl DebugCmd {
-    pub fn run(self) -> Result<(), DaemonError> {
+    pub fn run(self) -> Result<()> {
         match self.subcommand {
             DebugSubcmd::DeriveBaseAddress {
                 pubkey,

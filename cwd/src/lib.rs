@@ -9,7 +9,9 @@ pub mod prompt;
 
 pub use crate::{
     config::{AppConfig, ClientConfig},
-    error::DaemonError,
+    error::Error,
     key::Key,
     keyring::Keyring,
 };
+
+pub(crate) use crate::error::Result;
