@@ -1,7 +1,3 @@
-> **_THIS IS A TECHNICAL DEMO, NOT FOR PRODUCTION USE_**
->
-> **_The reposiroty will be archived, with its content migrated to the [CWD repo](https://github.com/larry0x/cwd) where furture development will happen._**
-
 # tree
 
 A versioned and merklized key-value store, based on a radix tree data structure.
