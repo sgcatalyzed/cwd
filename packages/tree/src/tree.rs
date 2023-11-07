@@ -2,9 +2,9 @@ use {
     crate::{
         Batch, Child, GetResponse, Nibble, NibbleIterator, NibblePath, NibbleRange,
         NibbleRangeIterator, Node, NodeKey, Op, OpResponse, Proof, ProofNode, Record, RootResponse,
-        Set,
     },
     cosmwasm_std::{to_binary, Order, StdResult, Storage},
+    cw_item_set::Set,
     cw_storage_plus::{Item, Map, PrefixBound},
     serde::{de::DeserializeOwned, ser::Serialize},
     std::{cmp::Ordering, collections::HashMap},
@@ -340,7 +340,7 @@ where
 
             for (stale_since_version, node_key) in &batch {
                 self.nodes.remove(store, node_key);
-                self.orphans.remove(store, (*stale_since_version, node_key));
+                self.orphans.remove(store, (*stale_since_version, node_key))?;
             }
 
             if batch.len() < PRUNE_BATCH_SIZE {
@@ -379,7 +379,7 @@ where
         orphaned_since_version: u64,
         node_key: &NodeKey,
     ) -> StdResult<()> {
-        self.orphans.insert(store, (orphaned_since_version, node_key))
+        self.orphans.insert(store, (orphaned_since_version, node_key)).map(|_| ())
     }
 
     pub fn root(&self, store: &dyn Storage, version: Option<u64>) -> Result<RootResponse> {

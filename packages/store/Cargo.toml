@@ -1,18 +1,17 @@
 [package]
-name          = "cw-store"
-description   = "Storage data structure and database backend for CosmWasm SDK"
-version       = { workspace = true }
-authors       = { workspace = true }
-edition       = { workspace = true }
-rust-version  = { workspace = true }
-license       = { workspace = true }
-homepage      = { workspace = true }
-repository    = { workspace = true }
-documentation = { workspace = true }
-keywords      = { workspace = true }
+name         = "cw-store"
+authors      = { workspace = true }
+version      = { workspace = true }
+edition      = { workspace = true }
+rust-version = { workspace = true }
+homepage     = { workspace = true }
+repository   = { workspace = true }
+readme       = { workspace = true }
+license      = { workspace = true }
+publish      = { workspace = true }
 
 [features]
-default = ["iterator"]
+default  = ["iterator"]
 # This enables iterator functionality, as exposed in cosmwasm-std/iterator
 iterator = ["cosmwasm-std/iterator"]
 

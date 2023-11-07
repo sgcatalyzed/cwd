@@ -1,0 +1,72 @@
+[package]
+name         = "cosmwasm-std"
+authors      = ["Ethan Frey <ethanfrey@users.noreply.github.com>"]
+version      = { workspace = true }
+edition      = { workspace = true }
+rust-version = { workspace = true }
+homepage     = { workspace = true }
+repository   = { workspace = true }
+readme       = { workspace = true }
+license      = { workspace = true }
+publish      = { workspace = true }
+
+[package.metadata.docs.rs]
+features = ["abort", "stargate", "staking", "ibc3", "cosmwasm_1_4"]
+
+[features]
+default = ["iterator", "abort"]
+abort = []
+# iterator allows us to iterate over all DB items in a given range
+# optional as some merkle stores (like tries) don't support this
+# given Ethereum 1.0, 2.0, Substrate, and other major projects use Tries
+# we keep this optional, to allow possible future integration (or different Cosmos Backends)
+iterator = []
+# staking exposes bindings to a required staking moudle in the runtime, via new
+# CosmosMsg types, and new QueryRequest types. This should only be enabled on contracts
+# that require these types, so other contracts can be used on systems with eg. PoA consensus
+staking = []
+# stargate enables stargate-dependent messages and queries, like raw protobuf messages
+# as well as ibc-related functionality
+stargate = []
+# ibc3 extends ibc messages with ibc-v3 only features. This should only be enabled on contracts
+# that require these types. Without this, they get the smaller ibc-v1 API.
+ibc3 = ["stargate"]
+# This feature makes `BankQuery::Supply` available for the contract to call, but requires
+# the host blockchain to run CosmWasm `1.1.0` or higher.
+cosmwasm_1_1 = []
+# This feature makes `GovMsg::VoteWeighted` available for the contract to call, but requires
+# the host blockchain to run CosmWasm `1.2.0` or higher.
+cosmwasm_1_2 = ["cosmwasm_1_1"]
+# This feature makes `BankQuery::DenomMetadata` available for the contract to call, but requires
+# the host blockchain to run CosmWasm `1.3.0` or higher.
+cosmwasm_1_3 = ["cosmwasm_1_2"]
+# Together with the `iterator` feature this enables additional imports for more
+# efficient iteration over DB keys or values.
+# It also makes `DistributionQuery::{DelegationRewards, DelegationTotalRewards, DelegatorValidators}`
+# available for the contract to call.
+# It requires the host blockchain to run CosmWasm `1.4.0` or higher.
+cosmwasm_1_4 = ["cosmwasm_1_3"]
+
+[dependencies]
+base64              = { workspace = true }
+bnum                = { workspace = true }
+cosmwasm-std-derive = { workspace = true }
+derivative          = { workspace = true }
+forward_ref         = { workspace = true }
+hex                 = { workspace = true }
+schemars            = { workspace = true }
+sha2                = { workspace = true }
+serde               = { workspace = true, features = ["derive", "alloc"] }
+serde-json-wasm     = { workspace = true }
+thiserror           = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+cosmwasm-crypto = { workspace = true }
+
+[dev-dependencies]
+cosmwasm-schema = { workspace = true }
+# The chrono dependency is only used in an example, which Rust compiles for us. If this causes trouble, remove it.
+chrono          = { workspace = true, features = ["alloc", "std"] }
+crc32fast       = { workspace = true }
+hex-literal     = { workspace = true }
+serde_json      = { workspace = true }

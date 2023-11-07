@@ -29,10 +29,10 @@
 use {
     anyhow::bail,
     cosmwasm_std::{from_binary, testing::MockStorage, Storage},
+    cw_tree::{verify_membership, verify_non_membership, Batch, Op, Tree},
     rand::Rng,
     random_string::{charsets::ALPHANUMERIC, generate},
     std::{collections::BTreeMap, fs},
-    tree::{verify_membership, verify_non_membership, Batch, Op, Tree},
 };
 
 const TREE: Tree<String, String> = Tree::new_default();

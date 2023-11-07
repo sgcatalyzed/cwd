@@ -1,7 +1,7 @@
 use {
     cosmwasm_std::{from_binary, testing::MockStorage, Storage},
+    cw_tree::{verify_membership, verify_non_membership, Op, Tree},
     serde::ser::Serialize,
-    tree::{verify_membership, verify_non_membership, Op, Tree},
 };
 
 const TREE: Tree<String, String> = Tree::new_default();

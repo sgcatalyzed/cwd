@@ -10,6 +10,6 @@ See the comments in the [`denom`](./src/denom/mod.rs#L1-L23) module for further 
 
 See the [`token-factory`](../token-factory/) contract for an example implementation of namespace admin contracts.
 
-## License
+## Copyright
 
-(c) larry0x, 2022-23 - [All rights reserved](../../LICENSE).
+TBD

@@ -1,6 +1,6 @@
 use {
     cosmwasm_std::{testing::MockStorage, Order},
-    tree::{Op, Tree},
+    cw_tree::{Op, Tree},
 };
 
 const TREE: Tree<String, String> = Tree::new_default();

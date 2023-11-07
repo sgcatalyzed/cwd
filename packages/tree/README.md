@@ -1,4 +1,4 @@
-# tree
+# cw-tree
 
 A versioned and merklized key-value store, based on a radix tree data structure.
 
@@ -57,4 +57,4 @@ We took inspiration from JMT's code, which is open sourced under Apache-2.0.
 
 ## Copyright
 
-Materials in this repository are private property owned solely by [larry0x](https://twitter.com/larry0x). They are published for informational purposes only. No license, right of reproduction, of distribution, or other right with respect thereto is granted or implied.
+TBD

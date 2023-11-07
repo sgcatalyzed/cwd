@@ -1,0 +1,23 @@
+[package]
+name         = "cw-item-set"
+authors      = { workspace = true }
+version      = { workspace = true }
+edition      = { workspace = true }
+rust-version = { workspace = true }
+homepage     = { workspace = true }
+repository   = { workspace = true }
+readme       = { workspace = true }
+license      = { workspace = true }
+publish      = { workspace = true }
+
+[lib]
+doctest = false # disable doc tests
+
+[features]
+default  = ["iterator"]
+counter  = []
+iterator = ["cw-storage-plus/iterator"]
+
+[dependencies]
+cosmwasm-std    = { workspace = true }
+cw-storage-plus = { workspace = true }

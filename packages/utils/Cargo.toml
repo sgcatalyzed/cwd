@@ -1,0 +1,29 @@
+[package]
+name         = "cw-utils"
+authors      = ["Ethan Frey <ethanfrey@users.noreply.github.com>"]
+version      = { workspace = true }
+edition      = { workspace = true }
+rust-version = { workspace = true }
+homepage     = { workspace = true }
+repository   = { workspace = true }
+readme       = { workspace = true }
+license      = { workspace = true }
+publish      = { workspace = true }
+
+[dependencies]
+cosmwasm-schema = { workspace = true }
+cosmwasm-std    = { workspace = true, default-features = false }
+cw2             = { workspace = true }
+schemars        = { workspace = true }
+semver          = { workspace = true }
+serde           = { workspace = true, features = ["derive"] }
+thiserror       = { workspace = true }
+
+[dev-dependencies]
+cw-storage-plus = { workspace = true }
+prost           = { workspace = true }
+anyhow          = { workspace = true }  # Not used directly but prost-derive does not set a sufficiently high anyhow version
+
+# We don't use these dependencies directly,
+# we tighten versions that builds with `-Zminimal-versions` work.
+ecdsa = "0.16.8"

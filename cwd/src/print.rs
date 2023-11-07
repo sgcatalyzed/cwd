@@ -1,3 +1,4 @@
+use bip32::PublicKey;
 use cosmwasm_std::Addr;
 use serde::Serialize;
 

@@ -1,7 +1,7 @@
-# cw-sdk
+# Cosmos Wasm Daemon
 
-State machine engine based on [CosmWasm](https://github.com/CosmWasm/cosmwasm).
+A smart contract execution environment for blockchains
 
-## License
+## Copyright
 
-(c) larry0x, 2022-23 - [All rights reserved](./LICENSE).
+TBD

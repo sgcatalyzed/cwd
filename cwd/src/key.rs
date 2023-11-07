@@ -1,4 +1,4 @@
-use bip32::{Mnemonic, XPrv};
+use bip32::{Mnemonic, PublicKey, XPrv};
 use cosmwasm_std::Addr;
 use josekit::jwt::JwtPayload;
 use k256::ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey};
@@ -45,7 +45,7 @@ impl Key {
         name: impl Into<String>,
         sk_bytes: &[u8],
     ) -> Result<Self> {
-        let sk = SigningKey::from_bytes(sk_bytes)?;
+        let sk = SigningKey::from_bytes(sk_bytes.into())?;
         Ok(Self {
             name: name.into(),
             sk,
@@ -58,7 +58,7 @@ impl Key {
     }
 
     /// Return the pubkey
-    pub fn pubkey(&self) -> VerifyingKey {
+    pub fn pubkey(&self) -> &VerifyingKey {
         self.sk.verifying_key()
     }
 

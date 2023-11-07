@@ -1,0 +1,71 @@
+[package]
+name         = "cosmwasm-vm"
+authors      = ["Ethan Frey <ethanfrey@users.noreply.github.com>"]
+version      = { workspace = true }
+edition      = { workspace = true }
+rust-version = { workspace = true }
+homepage     = { workspace = true }
+repository   = { workspace = true }
+readme       = { workspace = true }
+license      = { workspace = true }
+publish      = { workspace = true }
+
+[features]
+default = ["staking", "iterator"]
+# iterator allows us to iterate over all DB items in a given range
+# this must be enabled to support cosmwasm contracts compiled with the 'iterator' feature
+# optional as some merkle stores (like tries) don't support this
+# given Ethereum 1.0, 2.0, Substrate, and other major projects use Tries
+# we keep this optional, to allow possible future integration (or different Cosmos Backends)
+iterator = ["cosmwasm-std/iterator"]
+staking = ["cosmwasm-std/staking"]
+# this enables all stargate-related functionality, including the ibc entry points
+stargate = ["cosmwasm-std/stargate", "cosmwasm-std/ibc3"]
+# Use cranelift backend instead of singlepass. This is required for development on Windows.
+cranelift = ["wasmer/cranelift"]
+# It's a bit unclear if interface_version_7 (CosmWasm 0.16) contracts are fully compatible
+# with newer hosts. If old contracts are important to you and you are willing to take the risk,
+# activate this feature.
+# See also https://gist.github.com/webmaster128/3cd1988680843ecaf7548050821e1e6f.
+allow_interface_version_7 = []
+
+[lib]
+# See https://bheisler.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options
+bench = false
+
+[dependencies]
+clru               = { workspace = true }
+cosmwasm-std       = { workspace = true, default-features = false }
+cosmwasm-crypto    = { workspace = true }
+crc32fast          = { workspace = true }
+derivative         = { workspace = true }
+hex                = { workspace = true }
+schemars           = { workspace = true }
+serde              = { workspace = true, features = ["derive", "alloc"] }
+serde_json         = { workspace = true }
+sha2               = { workspace = true }
+thiserror          = { workspace = true }
+wasmer             = { workspace = true, features = ["cranelift", "singlepass"] }
+wasmer-middlewares = { workspace = true }
+
+# Dependencies that we do not use ourself. We add those entries
+# to bump the min version of them.
+bytes     = "1.4.0" # need a higher version than the one required by Wasmer for the Bytes -> Vec<u8> implementation
+bytecheck = "0.6.3" # With this version the simdutf8 dependency became optional
+enumset   = "1.0.2" # Fixes https://github.com/Lymia/enumset/issues/17 (https://github.com/Lymia/enumset/commit/a430550cd6a3c9b1ef636d37f75dede7616f5b62)
+bitflags  = "1.1.0" # https://github.com/CensoredUsername/dynasm-rs/pull/74
+
+[dev-dependencies]
+clap           = { workspace = true }
+criterion      = { workspace = true, features = ["html_reports"] }
+glob           = { workspace = true }
+leb128         = { workspace = true }
+hex-literal    = { workspace = true }
+rand           = { workspace = true }
+target-lexicon = { workspace = true }
+tempfile       = { workspace = true }
+wat            = { workspace = true }
+
+[[bench]]
+name    = "main"
+harness = false
